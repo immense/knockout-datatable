@@ -13,8 +13,6 @@ class @DataTable
       perPage: options.perPage or 15
       filterFn: options.filterFn or ->
 
-    console.log @rows()[0]
-
     @sortDir = ko.observable @options.sortDir
     @sortField = ko.observable @options.sortField
     @perPage = ko.observable @options.perPage
