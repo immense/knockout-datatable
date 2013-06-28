@@ -33,9 +33,9 @@ class @DataTable
         aVal = ko.utils.unwrapObservable a[@sortField()]
         bVal = ko.utils.unwrapObservable b[@sortField()]
         if @sortDir() is 'asc'
-          if aVal < bVal then -1 else (if aVal > bVal then 1 else 0)
+          if aVal < bVal or aVal is '' or not aVal? then -1 else (if aVal > bVal or bVal is '' or not bVal? then 1 else 0)
         else
-          if aVal < bVal then 1 else (if aVal > bVal then -1 else 0)
+          if aVal < bVal or aVal is '' or not aVal? then 1 else (if aVal > bVal or bVal is '' or not bVal? then -1 else 0)
 
     @pagedRows = ko.computed =>
       pageIndex = @currentPage() - 1
@@ -68,6 +68,8 @@ class @DataTable
       else
         s = if total > 1 or total is 0 then 's' else ''
         "#{total} #{recordWord}#{s}"
+
+    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then 'icon-sort-up' else 'icon-sort-down') else 'icon-sort'
 
   toggleSort: (field) -> =>
     if @sortField() is field
