@@ -1,0 +1,28 @@
+input(type='text', data-bind='instant: filter')
+
+div(data-bind='with: exampleTable')
+  table.table.table-striped
+    thead
+      tr
+        th.sortable(data-bind='click: toggleSort("foo")') Foo
+        th.sortable(data-bind='click: toggleSort("bar")') Bar
+        th Baz
+    tbody
+      tr(data-bind='visible: pagedRows().length === 0')
+        td.aligncenter(colspan=7) This table has no data.
+      tr(data-bind='repeat: { foreach: pagedRows, item: "$row" }')
+        td(data-bind='text: $row().foo')
+        td(data-bind='text: $row().bar')
+        td(data-bind='text: $row().baz')
+
+  .info.pull-right(data-bind='text: recordsText')
+
+  .pagination(data-bind='visible: pages() > 1')
+    ul
+      li(data-bind='css: leftPagerClass, click: prevPage'): a(href='#') &laquo;
+      li(data-bind='repeat: {count: pages, bind: "css: pageClass($index + 1)"}')
+        a(href='#', data-bind='text: $index + 1, click: gotoPage($index + 1)')
+      li(data-bind='css: rightPagerClass, click: nextPage'): a(href='#') &raquo;
+
+:coffeescript
+  $ -> window.view = new ExampleModel
