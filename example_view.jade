@@ -19,7 +19,7 @@ div(data-bind='with: exampleTable')
         td(data-bind='text: $row().bar')
         td(data-bind='text: $row().baz')
 
-  .info.pull-right(data-bind='text: recordsText')
+  span.label.label-info.pull-right(data-bind='text: recordsText')
 
   .pagination(data-bind='visible: pages() > 1')
     ul

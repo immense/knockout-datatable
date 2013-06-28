@@ -8,6 +8,7 @@ class @DataTable
     # set some default options if none were passed in
     @options =
       recordWord: options.recordWord or 'record'
+      recordWordPlural: options.recordWordPlural
       sortDir: options.sortDir or 'asc'
       sortField: options.sortField
       perPage: options.perPage or 15
@@ -63,11 +64,11 @@ class @DataTable
       from = @from()
       to = @to()
       recordWord = @options.recordWord
+      recordWordPlural = @options.recordWordPlural or recordWord + 's'
       if pages > 1
-        "#{from} to #{to} of #{total} #{recordWord}s"
+        "#{from} to #{to} of #{total} #{recordWordPlural}"
       else
-        s = if total > 1 or total is 0 then 's' else ''
-        "#{total} #{recordWord}#{s}"
+        "#{total} #{if total > 1 or total is 0 then recordWordPlural else recordWord}"
 
     @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then 'icon-sort-up' else 'icon-sort-down') else 'icon-sort'
 

@@ -18,6 +18,7 @@ class @ExampleModel
       else
         tableOptions =
           recordWord: 'thing'
+          recordWordPlural: 'snakes' # This is optional. If left blank, the datatable will just append an 's' to recordWord
           sortDir: 'desc'
           sortField: 'foo'
           perPage: 15
