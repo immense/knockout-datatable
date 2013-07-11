@@ -1,7 +1,15 @@
 table {
   thead {
     tr {
-      th.sortable {cursor: pointer;}
+      th.sortable {
+        cursor: pointer;
+        i {
+          color: #C5C5C5;
+          &.icon-sort-down, &.icon-sort-up {
+            color: black;
+          }
+        }
+      }
     }
   }
 }
