@@ -1,6 +1,6 @@
 class @DataTable
 
-  constructor: (@rows, options) ->
+  constructor: (rows, options) ->
 
     if not options.sortField?
       throw new Error 'sortField must be supplied.'
@@ -19,8 +19,11 @@ class @DataTable
     @perPage = ko.observable @options.perPage
     @currentPage = ko.observable 1
     @filter = ko.observable ''
+    @loading = ko.observable false
 
     @filter.subscribe => @currentPage 1
+
+    @rows = ko.observableArray rows
 
     @filteredRows = ko.computed =>
       filter = @filter()
@@ -70,6 +73,11 @@ class @DataTable
       else
         "#{total} #{if total > 1 or total is 0 then recordWordPlural else recordWord}"
 
+    # state info
+    @showNoData  = ko.computed => @pagedRows().length is 0 and not @loading()
+    @showLoading = ko.computed => @loading()
+
+    # sort arrows
     @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then 'icon-sort-up' else 'icon-sort-down') else 'icon-sort'
 
   toggleSort: (field) -> =>

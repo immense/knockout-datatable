@@ -10,25 +10,33 @@ class @ExampleModel
 
   constructor: ->
 
-    @exampleTable = ko.observable()
+    tableOptions =
+      recordWord: 'thing'
+      recordWordPlural: 'snakes' # This is optional. If left blank, the datatable will just append an 's' to recordWord
+      sortDir: 'desc'
+      sortField: 'foo'
+      perPage: 15
+      filterFn: (filter) ->
+        filterRegex = new RegExp "#{filter}", 'i'
+        (row) ->
+          filterRegex.test(row.foo) or filterRegex.test(row.bar) or row.test(row.baz)
 
-    $.getJSON "/api/rows", (response) =>
+    @exampleTable = new DataTable [], tableOptions
+    @exampleTable.loading true
+
+    req = $.getJSON "/api/rows"
+
+    req.done (response) =>
       if response.error?
         messenger.error 'Unable to retrieve rows.'
       else
-        tableOptions =
-          recordWord: 'thing'
-          recordWordPlural: 'snakes' # This is optional. If left blank, the datatable will just append an 's' to recordWord
-          sortDir: 'desc'
-          sortField: 'foo'
-          perPage: 15
-          filterFn: (filter) ->
-            filterRegex = new RegExp "#{filter}", 'i'
-            (row) ->
-              filterRegex.test(row.foo) or filterRegex.test(row.bar) or row.test(row.baz)
+        rows = response.results.map (row) => new Row @, row
+        @exampleTable.rows rows
+      @exampleTable.loading false
 
-        rows = ko.observableArray response.results.map (row) => new Row @, row
-        @exampleTable new DataTable rows, tableOptions
+    req.fail (jqXHR, textStatus, errorThrown) =>
+      messenger.error "Unknown error: #{errorThrown}"
+      @exampleTable.loading false
 
     @filter = ko.observable ''
 
@@ -38,3 +46,5 @@ class @ExampleModel
     .extend throttle: 250
 
     ko.applyBindings @
+    $('.cloak').removeClass 'cloak'
+    $('.bindingloader').remove()

@@ -6,7 +6,11 @@ mixin th-sortable(field)
 
 input(type='text', data-bind='instant: filter')
 
-div(data-bind='with: exampleTable')
+p.aligncenter.bindingloader
+  i.icon-spinner.icon-spin
+  |&nbsp;Loading...
+
+div.cloak(data-bind='with: exampleTable')
   table.table.table-striped
     thead
       tr
@@ -14,8 +18,12 @@ div(data-bind='with: exampleTable')
         +th-sortable('bar') Bar
         th Baz
     tbody
-      tr(data-bind='visible: pagedRows().length === 0')
-        td.aligncenter(colspan=7) This table has no data.
+      tr(data-bind='visible: showNoData')
+        td.aligncenter(colspan=3) This table has no data.
+      tr(data-bind='visible: showLoading')
+        td.aligncenter(colspan=3)
+          i.icon-spinner(data-bind='css: {"icon-spin": showLoading}')
+          |&nbsp;Loading data...
       tr(data-bind='repeat: { foreach: pagedRows, item: "$row" }')
         td(data-bind='text: $row().foo')
         td(data-bind='text: $row().bar')

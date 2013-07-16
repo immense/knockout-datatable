@@ -1,8 +1,17 @@
+.no-select {
+  -o-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 table {
   thead {
     tr {
       th.sortable {
         cursor: pointer;
+        .no-select;
         i {
           color: #C5C5C5;
           &.icon-sort-down, &.icon-sort-up {
