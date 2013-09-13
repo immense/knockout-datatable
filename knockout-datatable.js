@@ -34,6 +34,12 @@
           var aVal, bVal;
           aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
           bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
+          if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+          }
+          if (typeof bVal === 'string') {
+            bVal = bVal.toLowerCase();
+          }
           if (_this.sortDir() === 'asc') {
             if (aVal < bVal || aVal === '' || (aVal == null)) {
               return -1;

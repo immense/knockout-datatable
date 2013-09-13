@@ -36,6 +36,8 @@ class @DataTable
       rows.sort (a,b) =>
         aVal = ko.utils.unwrapObservable a[@sortField()]
         bVal = ko.utils.unwrapObservable b[@sortField()]
+        if typeof aVal is 'string' then aVal = aVal.toLowerCase()
+        if typeof bVal is 'string' then bVal = bVal.toLowerCase()
         if @sortDir() is 'asc'
           if aVal < bVal or aVal is '' or not aVal? then -1 else (if aVal > bVal or bVal is '' or not bVal? then 1 else 0)
         else
