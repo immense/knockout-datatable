@@ -1,5 +1,16 @@
 class @DataTable
 
+  primitiveCompare = (item1, item2) ->
+    if not item2?
+      not item1?
+    else if item1? and item2?
+      if typeof item1 is 'boolean'
+        item1 is item2
+      else
+        item1.toString().toLowerCase().indexOf(item2.toString().toLowerCase()) >= 0 or item1 is item2
+    else
+      false
+
   constructor: (rows, options) ->
 
     if not options.sortField?
@@ -12,7 +23,7 @@ class @DataTable
       sortDir: options.sortDir or 'asc'
       sortField: options.sortField
       perPage: options.perPage or 15
-      filterFn: options.filterFn or ->
+      filterFn: options.filterFn or undefined
 
     @sortDir = ko.observable @options.sortDir
     @sortField = ko.observable @options.sortField
@@ -25,13 +36,25 @@ class @DataTable
 
     @rows = ko.observableArray rows
 
+    @rowAttributeMap = ko.computed =>
+      rows = @rows()
+      attrMap = {}
+
+      if rows.length > 0
+        row = rows[0]
+        (attrMap[key.toLowerCase()] = key) for key of row when row.hasOwnProperty(key)
+
+      attrMap
+
     @filteredRows = ko.computed =>
       filter = @filter()
 
       rows = @rows()
 
       if filter isnt ''
-        rows = rows.filter @options.filterFn filter
+        filterFn = @filterFn(filter)
+        rows = rows.filter(filterFn)
+
 
       rows.sort (a,b) =>
         aVal = ko.utils.unwrapObservable a[@sortField()]
@@ -102,3 +125,38 @@ class @DataTable
   gotoPage: (page) -> => @currentPage page
 
   pageClass: (page) -> ko.computed => 'active' if @currentPage() is page
+
+  defaultMatch: (filter, row) ->
+    (val for key, val of row when row.hasOwnProperty(key)).some (val) ->
+      primitiveCompare((if ko.isObservable(val) then val() else val), filter)
+
+  filterFn: (filterVar) ->
+    # If the user has defined a filterFn in the table options, use it
+    # (for backwards compatibility with older datatable)
+    if @options.filterFn?
+      return @options.filterFn(filterVar)
+    else
+      # Split up filterVar into :-based conditionals and a filter
+      [filter, specials] = [[],{}]
+      filterVar.split(' ').forEach (word) ->
+        if word.indexOf(':') >= 0
+          words = word.split(':')
+          specials[words[0]] = switch words[1].toLowerCase()
+            when 'yes', 'true' then true
+            when 'no', 'false' then false
+            when 'blank', 'none', 'null', 'undefined' then undefined
+            else words[1].toLowerCase()
+        else
+          filter.push word
+      filter = filter.join(' ')
+      defaultMatch = @defaultMatch
+      attrMap = @rowAttributeMap()
+      return (row) ->
+        conditionals = for key, val of specials
+          do (key, val) =>
+            if rowAttr = attrMap[key.toLowerCase()] # If the current key (lowercased) is in the attr map
+              primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
+            else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
+              false
+        # console.log conditionals
+        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row)) else true)

@@ -1,6 +1,11 @@
 # a row in the datatable
 class Row
 
+  match: (filter) ->
+    @foo().toLowerCase().indexOf(filter) >= 0 or
+    @bar().toLowerCase().indexOf(filter) >= 0 or
+    @baz  .toLowerCase().indexOf(filter) >= 0
+
   constructor: (@view, row) ->
     @foo = ko.observable row.foo
     @bar = ko.observable row.bar
@@ -16,10 +21,6 @@ class @ExampleModel
       sortDir: 'desc'
       sortField: 'foo'
       perPage: 15
-      filterFn: (filter) ->
-        filterRegex = new RegExp "#{filter}", 'i'
-        (row) ->
-          filterRegex.test(row.foo) or filterRegex.test(row.bar) or row.test(row.baz)
 
     @exampleTable = new DataTable [], tableOptions
     @exampleTable.loading true
@@ -41,8 +42,7 @@ class @ExampleModel
     @filter = ko.observable ''
 
     ko.computed =>
-      filter = @filter()
-      if @exampleTable()? then @exampleTable().filter filter
+      @exampleTable.filter @filter()
     .extend throttle: 250
 
     ko.applyBindings @
