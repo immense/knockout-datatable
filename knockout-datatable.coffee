@@ -24,6 +24,9 @@ class @DataTable
       sortField: options.sortField
       perPage: options.perPage or 15
       filterFn: options.filterFn or undefined
+      sortIconClass: options.sortIconClass or 'icon-sort'
+      sortDescIconClass: options.sortDescIconClass or 'icon-sort-down'
+      sortAscIconClass: options.sortAscIconClass or 'icon-sort-up'
 
     @sortDir = ko.observable @options.sortDir
     @sortField = ko.observable @options.sortField
@@ -103,7 +106,7 @@ class @DataTable
     @showLoading = ko.computed => @loading()
 
     # sort arrows
-    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then 'icon-sort-up' else 'icon-sort-down') else 'icon-sort'
+    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then @options.sortAscIconClass else @options.sortDescIconClass) else @options.sortIconClass
 
   toggleSort: (field) -> =>
     if @sortField() is field
@@ -126,9 +129,12 @@ class @DataTable
 
   pageClass: (page) -> ko.computed => 'active' if @currentPage() is page
 
-  defaultMatch: (filter, row) ->
-    (val for key, val of row when row.hasOwnProperty(key)).some (val) ->
-      primitiveCompare((if ko.isObservable(val) then val() else val), filter)
+  defaultMatch: (filter, row, attrMap) ->
+    console.log filter
+    console.log row
+    console.log attrMap
+    (val for key, val of attrMap).some (val) ->
+      primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
 
   filterFn: (filterVar) ->
     # If the user has defined a filterFn in the table options, use it
@@ -159,4 +165,4 @@ class @DataTable
             else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
               false
         # console.log conditionals
-        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row)) else true)
+        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row, attrMap)) else true)

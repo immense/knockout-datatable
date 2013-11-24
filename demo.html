@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Knockout DataTable Demo</title>
+    <link rel='stylesheet' type='text/css' href='http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css'>
+    <link rel='stylesheet' type='text/css' href='knockout-datatable.css'>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js'></script>
+    <script src='knockout-datatable.min.js'></script>
+    <style type='text/css'>
+      /* yanked from bootstrap demos: http://getbootstrap.com/examples/jumbotron-narrow/ */
+
+      /* Space out content a bit */
+      body {
+        padding-top: 20px;
+        padding-bottom: 20px;
+      }
+
+      /* Everything but the jumbotron gets side spacing for mobile first views */
+      .header,
+      .marketing,
+      .footer {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      /* Custom page header */
+      .header {
+        border-bottom: 1px solid #e5e5e5;
+      }
+      /* Make the masthead heading the same height as the navigation */
+      .header h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 40px;
+        padding-bottom: 19px;
+      }
+
+      /* Custom page footer */
+      .footer {
+        padding-top: 19px;
+        color: #777;
+        border-top: 1px solid #e5e5e5;
+      }
+
+      /* Customize container */
+      @media (min-width: 768px) {
+        .container {
+          max-width: 730px;
+        }
+      }
+      .container-narrow > hr {
+        margin: 30px 0;
+      }
+
+      /* Main marketing message and sign up button */
+      .jumbotron {
+        text-align: center;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+
+      /* Supporting marketing content */
+      .marketing {
+        margin: 40px 0;
+      }
+      .marketing p + h4 {
+        margin-top: 28px;
+      }
+
+      /* Responsive: Portrait tablets and up */
+      @media screen and (min-width: 768px) {
+        /* Remove the padding we set earlier */
+        .header,
+        .marketing,
+        .footer {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        /* Space out the masthead */
+        .header {
+          margin-bottom: 30px;
+        }
+        /* Remove the bottom border on the jumbotron for visual effect */
+        .jumbotron {
+          border-bottom: 0;
+        }
+      }
+
+      dd {
+        margin-bottom: 1em;
+      }
+
+    </style>
+
+    <script type='text/javascript'>
+    var citiesList = [
+        {
+          city_name: "Tokyo",
+          country_name: "Japan",
+          population: 31714000
+        }, {
+          city_name: "Seoul",
+          country_name: "South Korea",
+          population: 25721000
+        }, {
+          city_name: "Jakarta",
+          country_name: "Indonesia",
+          population: 23308500
+        }, {
+          city_name: "Delhi",
+          country_name: "India",
+          population: 21753486
+        }, {
+          city_name: "Mumbai",
+          country_name: "India",
+          population: 20748395
+        }, {
+          city_name: "Mexico City",
+          country_name: "Mexico",
+          population: 20116842
+        }, {
+          city_name: "São Paulo",
+          country_name: "Brazil",
+          population: 19956590
+        }, {
+          city_name: "New York",
+          country_name: "United States",
+          population: 19831858
+        }, {
+          city_name: "Moscow",
+          country_name: "Russia",
+          population: 17000000
+        }, {
+          city_name: "Osaka-Kobe-Kyoto (Keihanshin)",
+          country_name: "Japan",
+          population: 16663000
+        }, {
+          city_name: "Kolkata",
+          country_name: "India",
+          population: 14617882
+        }, {
+          city_name: "London",
+          country_name: "United Kingdom",
+          population: 13614409
+        }, {
+          city_name: "Los Angeles",
+          country_name: "United States",
+          population: 13052921
+        }, {
+          city_name: "Buenos Aires",
+          country_name: "Argentina",
+          population: 12801364
+        }, {
+          city_name: "Dhaka",
+          country_name: "Bangladesh",
+          population: 12797394
+        }, {
+          city_name: "Paris",
+          country_name: "France",
+          population: 12161542
+        }, {
+          city_name: "Manila",
+          country_name: "Philippines",
+          population: 11855975
+        }, {
+          city_name: "Rio de Janeiro",
+          country_name: "Brazil",
+          population: 11846530
+        }, {
+          city_name: "Chicago",
+          country_name: "United States",
+          population: 9522434
+        }, {
+          city_name: "Nagoya",
+          country_name: "Japan",
+          population: 9046000
+        }, {
+          city_name: "Chennai",
+          country_name: "India",
+          population: 8917749
+        }, {
+          city_name: "Bangalore",
+          country_name: "India",
+          population: 8728906
+        }, {
+          city_name: "Lima",
+          country_name: "Peru",
+          population: 8482619
+        }, {
+          city_name: "Bogotá",
+          country_name: "Colombia",
+          population: 7881156
+        }, {
+          city_name: "Hyderabad",
+          country_name: "India",
+          population: 7749334
+        }, {
+          city_name: "Dallas–Fort Worth",
+          country_name: "United States",
+          population: 6700991
+        }, {
+          city_name: "Santiago",
+          country_name: "Chile",
+          population: 6683852
+        }, {
+          city_name: "Madrid",
+          country_name: "Spain",
+          population: 6387824
+        }, {
+          city_name: "Ahmedabad",
+          country_name: "India",
+          population: 6352254
+        }, {
+          city_name: "Houston",
+          country_name: "United States",
+          population: 6177035
+        }, {
+          city_name: "Philadelphia",
+          country_name: "United States",
+          population: 6018800
+        }, {
+          city_name: "Washington, D.C.",
+          country_name: "United States",
+          population: 5860342
+        }, {
+          city_name: "Miami",
+          country_name: "United States",
+          population: 5762717
+        }, {
+          city_name: "Toronto",
+          country_name: "Canada",
+          population: 5583064
+        }, {
+          city_name: "Belo Horizonte",
+          country_name: "Brazil",
+          population: 5504635
+        }, {
+          city_name: "Atlanta",
+          country_name: "United States",
+          population: 5457831
+        }, {
+          city_name: "Barcelona",
+          country_name: "Spain",
+          population: 5357422
+        }, {
+          city_name: "Singapore",
+          country_name: "Singapore",
+          population: 5312000
+        }, {
+          city_name: "Ruhr",
+          country_name: "Germany",
+          population: 5135136
+        }, {
+          city_name: "Berlin",
+          country_name: "Germany",
+          population: 5097712
+        }, {
+          city_name: "Pune",
+          country_name: "India",
+          population: 5049968
+        }, {
+          city_name: "Beijing",
+          country_name: "China",
+          population: 1250000
+        }, {
+          city_name: "Cairo",
+          country_name: "Egypt",
+          population: 1445000
+        }, {
+          city_name: "Hong Kong-Shenzhen",
+          country_name: "China",
+          population: 1580000
+        }, {
+          city_name: "Karachi",
+          country_name: "Pakistan",
+          population: 1180000
+        }, {
+          city_name: "Shanghai",
+          country_name: "China",
+          population: 1665000
+        }
+      ];
+
+      var City;
+
+      City = (function() {
+
+        function City(view, row) {
+          this.view = view;
+          this.population = ko.observable(row.population);
+          this.countryName = row.country_name;
+          this.cityName = row.city_name;
+        }
+
+        return City;
+
+      })();
+
+      this.CitiesModel = (function() {
+
+        function CitiesModel() {
+          var rows, tableOptions,
+            _this = this;
+          tableOptions = {
+            recordWord: 'city',
+            recordWordPlural: 'cities',
+            sortDir: 'asc',
+            sortField: 'population',
+            perPage: 15,
+            sortIconClass: "glyphicon glyphicon-sort",
+            sortAscIconClass: "glyphicon glyphicon-sort-by-attributes",
+            sortDescIconClass: "glyphicon glyphicon-sort-by-attributes-alt"
+          };
+          rows = citiesList.map(function(row) {
+            return new City(_this, row);
+          });
+          this.table = new DataTable(rows, tableOptions);
+          ko.applyBindings(this);
+
+          $('.cloak').removeClass('cloak');
+          $('.bindingloader').remove();
+        }
+
+        return CitiesModel;
+
+      })();
+    </script>
+  </head>
+  <body>
+    <div class='container'>
+      <div class='header'>
+        <ul class='nav nav-pills pull-right'>
+          <li class='active'><a href="#">Demo</a></li>
+          <li><a href='https://github.com/immense/knockout-datatable'>Code</a></li>
+        </ul>
+        <h3 class='text-muted'>Knockout DataTable</h3>
+      </div>
+      <div class='jumbotron'>
+        <h1>Knockout DataTable Demo</h1>
+      </div>
+      <div class='row'>
+        <div class='col-md-12'>
+
+          <h2>Simple example</h2>
+          <p>S'pose we wanted to display a table of cities. Just create a view model for the data:</p>
+
+          <pre class="pre-scrollable"><code class="coffeescript">
+class City
+
+  constructor: (@view, row) ->
+    @population  = ko.observable row.population
+    @countryName = row.country_name
+    @cityName    = row.city_name
+
+class @CitiesModel
+
+  constructor: ->
+
+    tableOptions =
+      recordWord:       'city'
+      recordWordPlural: 'cities'
+      sortDir:          'asc'
+      sortField:        'population'
+      perPage:          15
+
+    @table = new DataTable [], tableOptions
+    @table.loading true
+
+    req = $.getJSON "/api/cities"
+
+    req.done (response) =>
+      if response.error?
+        alert 'Unable to retrieve cities.'
+      else
+        rows = response.results.map (row) => new City @, row
+        @table.rows rows
+      @table.loading false
+
+    req.fail (jqXHR, textStatus, errorThrown) =>
+      alert "Unknown error: #{errorThrown}"
+      @table.loading false
+
+    ko.applyBindings @
+    $('.cloak').removeClass 'cloak'
+    $('.bindingloader').remove()
+          </code></pre>
+
+          <p>And a table, like so:</p>
+          <pre class="pre-scrollable"><code class="html">
+&lt;input type="text" data-bind="value: table.filter" placeholder="Search"/&gt;
+&lt;p class="aligncenter bindingloader"&gt;
+  &lt;i class="icon-spinner icon-spin"&gt;&lt;/i&gt;
+  Loading...
+&lt;/p&gt;
+&lt;div data-bind="with: table" class="cloak"&gt;
+  &lt;table class="table table-striped table-bordered"&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th style="width: 34%;" data-bind="click: toggleSort('cityName')" class="sortable"&gt;
+          City
+          &lt;i data-bind="css: sortClass('cityName')"&gt;&lt;/i&gt;
+        &lt;/th&gt;
+        &lt;th style="width: 33%;" data-bind="click: toggleSort('countryName')" class="sortable"&gt;
+          Country
+          &lt;i data-bind="css: sortClass('countryName')"&gt;&lt;/i&gt;
+        &lt;/th&gt;
+        &lt;th style="width: 33%;" data-bind="click: toggleSort('population')" class="sortable"&gt;
+          Population
+          &lt;i data-bind="css: sortClass('population')"&gt;&lt;/i&gt;
+        &lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+      &lt;tr data-bind="visible: showNoData"&gt;
+        &lt;td colspan="3" class="aligncenter"&gt;
+          This table has no data.
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr data-bind="visible: showLoading"&gt;
+        &lt;td colspan="3" class="aligncenter"&gt;
+          &lt;i data-bind="css: {'icon-spin': showLoading}" class="icon-spinner"&gt;&lt;/i&gt;
+          Loading data...
+        &lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;!-- ko foreach: {data: pagedRows, as: '$row'}  --&gt;
+      &lt;tr&gt;
+        &lt;td data-bind="text: $row.cityName"&gt;&lt;/td&gt;
+        &lt;td data-bind="text: $row.countryName"&gt;&lt;/td&gt;
+        &lt;td data-bind="text: $row.population"&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;!-- /ko --&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+  &lt;span data-bind="text: recordsText" class="label label-info pull-right"&gt;&lt;/span&gt;
+  &lt;div data-bind="visible: pages() &gt; 1"&gt;
+    &lt;ul class="pagination"&gt;
+      &lt;li data-bind="css: leftPagerClass, click: prevPage"&gt;
+        &lt;a href="#"&gt;&amp;laquo;&lt;/a&gt;
+      &lt;/li&gt;
+      &lt;!-- ko foreach: {data: (new Array(pages()))} --&gt;
+      &lt;li data-bind="css: $parent.pageClass($index() + 1)"&gt;
+        &lt;a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"&gt;&lt;/a&gt;
+      &lt;/li&gt;
+      &lt;!-- /ko --&gt;
+      &lt;li data-bind="css: rightPagerClass, click: nextPage"&gt;
+        &lt;a href="#"&gt;&amp;raquo;&lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+(function() {
+
+  $(function() {
+    new CitiesModel();
+  });
+
+}).call(this);
+&lt;/script&gt;
+
+          </code></pre>
+
+          <h3>Result:</h3>
+          <input type="text" data-bind="value: table.filter" placeholder="Search"/>
+          <p class="aligncenter bindingloader">
+            <i class="icon-spinner icon-spin"></i>
+            Loading...
+          </p>
+          <div data-bind="with: table" class="cloak">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th style="width: 34%;" data-bind="click: toggleSort('cityName')" class="sortable">
+                    City
+                    <i data-bind="css: sortClass('cityName')"></i>
+                  </th>
+                  <th style="width: 33%;" data-bind="click: toggleSort('countryName')" class="sortable">
+                    Country
+                    <i data-bind="css: sortClass('countryName')"></i>
+                  </th>
+                  <th style="width: 33%;" data-bind="click: toggleSort('population')" class="sortable">
+                    Population
+                    <i data-bind="css: sortClass('population')"></i>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-bind="visible: showNoData">
+                  <td colspan="3" class="aligncenter">
+                    This table has no data.
+                  </td>
+                </tr>
+                <tr data-bind="visible: showLoading">
+                  <td colspan="3" class="aligncenter">
+                    <i data-bind="css: {'icon-spin': showLoading}" class="icon-spinner"></i>
+                    Loading data...
+                  </td>
+                </tr>
+                <!-- ko foreach: {data: pagedRows, as: '$row'}  -->
+                <tr>
+                  <td data-bind="text: $row.cityName"></td>
+                  <td data-bind="text: $row.countryName"></td>
+                  <td data-bind="text: $row.population"></td>
+                </tr>
+                <!-- /ko -->
+              </tbody>
+            </table>
+            <span data-bind="text: recordsText" class="label label-info pull-right"></span>
+            <div data-bind="visible: pages() > 1">
+              <ul class="pagination">
+                <li data-bind="css: leftPagerClass, click: prevPage">
+                  <a href="#">&laquo;</a>
+                </li>
+                <!-- ko foreach: {data: (new Array(pages()))} -->
+                <li data-bind="css: $parent.pageClass($index() + 1)">
+                  <a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"></a>
+                </li>
+                <!-- /ko -->
+                <li data-bind="css: rightPagerClass, click: nextPage">
+                  <a href="#">&raquo;</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <script type="text/javascript">
+          (function() {
+
+            $(function() {
+              window.view = new CitiesModel();
+            });
+
+          }).call(this);
+          </script>
+
+
+          <h2>Options</h2>
+          <p>When instanciating with <code>new DataTable</code> you have can pass in the following options as the second parameter:</p>
+          <dl class='dl-horizontal'>
+            <dt><code>recordWord</code></dt>
+            <dd>The name of your rows. In the case above, we used <code>city</code>. Default: <code>record</code></dd>
+
+            <dt><code>recordWordPlural</code></dt>
+            <dd>The plural name of your rows. Since we used <code>city</code> as our recordWord, we used <code>cities</code> for recordWordPlural. Default: <code>recordWord + 's'</code></dd>
+
+            <dt><code>sortDir</code></dt>
+            <dd>The initial sorting direction for the table. Default: <code>'asc'</code></dd>
+
+            <dt><code>sortField</code></dt>
+            <dd>The initial sorting column for the table. This setting is required, and the table will raise 'sortField must be supplied' error if sortfield is left unset.</dd>
+
+            <dt><code>perPage</code></dt>
+            <dd>Integer indicating the number of rows to be shown per page. Default: <code>Infinity</code></dd>
+
+            <dt><code>sortIconClass</code><br /><code>sortDescIconClass</code><br /><code>sortAscIconClass</code></dt>
+            <dd>The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons. Defaults: <code>'icon icon-sort'</code>, <code>'icon icon-sort-down'</code>, <code>'icon icon-sort-down'</code> respectively (from <a href='http://fontawesome.io/'>FontAwesome</a>)</dd>
+          </dl>
+          <p>Additionally, you can define the <code>match</code> function on the row class, and the datatable will use it for filtering. If left undefined (as in the example above), the DataTable will automatically search all columns defined on the row. E.g:</p>
+          <dl>
+            <dt><code>row.match:</code></dt>
+            <dd><pre><code class="coffeescript">
+              (filter) ->
+                @population().toLowerCase().indexOf(filter) >= 0 or
+                @countryName .toLowerCase().indexOf(filter) >= 0 or
+                @cityName    .toLowerCase().indexOf(filter) >= 0
+            </code></pre></dd>
+          </dl>
+
+          <h2>Further Usage</h2>
+          <p>Knockout DataTable comes packaged some some advanced filtering. Below is a list of example search terms and the results returned.</p>
+          <dl>
+            <dt><code>cityName:atlanta</code></dt>
+            <dd>Results with 'atlanta' in cityName (case insensitive)</dd>
+            <dt><code>cItYnAmE:aTlAnTa</code></dt>
+            <dd>Results with 'atlanta' in cityName (case insensitive)</dd>
+            <dt><code>countryName:United cityName:L</code></dt>
+            <dd>Results with 'united' in countryName and 'l' in cityName (case insensitive)<p class="text-muted">Note: as of right now, there is no built-in support for multi-word searching with ':'-delimeted searching</span></dd>
+            <dt><code>countryname:japan 6</code></dt>
+            <dd>Results with 'japan' in countryName and '6' somewhere in one of the columns (case insensitive)</dd>
+          </dl>
+        </div>
+      </div>
+      <div class='footer'>
+        <p>&copy; Immense Networks 2013</p>
+      </div>
+    </div>
+  </body>
+</html>

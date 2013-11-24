@@ -29,7 +29,10 @@
         sortDir: options.sortDir || 'asc',
         sortField: options.sortField,
         perPage: options.perPage || 15,
-        filterFn: options.filterFn || void 0
+        filterFn: options.filterFn || void 0,
+        sortIconClass: options.sortIconClass || 'icon-sort',
+        sortDescIconClass: options.sortDescIconClass || 'icon-sort-down',
+        sortAscIconClass: options.sortAscIconClass || 'icon-sort-up'
       };
       this.sortDir = ko.observable(this.options.sortDir);
       this.sortField = ko.observable(this.options.sortField);
@@ -154,12 +157,12 @@
         return ko.computed(function() {
           if (_this.sortField() === column) {
             if (_this.sortDir() === 'asc') {
-              return 'icon-sort-up';
+              return _this.options.sortAscIconClass;
             } else {
-              return 'icon-sort-down';
+              return _this.options.sortDescIconClass;
             }
           } else {
-            return 'icon-sort';
+            return _this.options.sortIconClass;
           }
         });
       };
@@ -209,20 +212,21 @@
       });
     };
 
-    DataTable.prototype.defaultMatch = function(filter, row) {
+    DataTable.prototype.defaultMatch = function(filter, row, attrMap) {
       var key, val;
+      console.log(filter);
+      console.log(row);
+      console.log(attrMap);
       return ((function() {
         var _results;
         _results = [];
-        for (key in row) {
-          val = row[key];
-          if (row.hasOwnProperty(key)) {
-            _results.push(val);
-          }
+        for (key in attrMap) {
+          val = attrMap[key];
+          _results.push(val);
         }
         return _results;
       })()).some(function(val) {
-        return primitiveCompare((ko.isObservable(val) ? val() : val), filter);
+        return primitiveCompare((ko.isObservable(row[val]) ? row[val]() : row[val]), filter);
       });
     };
 
@@ -279,7 +283,7 @@
             }
             return _results;
           }).call(this);
-          return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : defaultMatch(filter, row)) : true);
+          return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : defaultMatch(filter, row, attrMap)) : true);
         };
       }
     };
