@@ -93,197 +93,16 @@
       dd {
         margin-bottom: 1em;
       }
+      pre {
+        overflow: auto;
+        word-wrap: normal;
+        white-space: pre;
+      }
 
     </style>
 
     <script type='text/javascript'>
-    var citiesList = [
-        {
-          city_name: "Tokyo",
-          country_name: "Japan",
-          population: 31714000
-        }, {
-          city_name: "Seoul",
-          country_name: "South Korea",
-          population: 25721000
-        }, {
-          city_name: "Jakarta",
-          country_name: "Indonesia",
-          population: 23308500
-        }, {
-          city_name: "Delhi",
-          country_name: "India",
-          population: 21753486
-        }, {
-          city_name: "Mumbai",
-          country_name: "India",
-          population: 20748395
-        }, {
-          city_name: "Mexico City",
-          country_name: "Mexico",
-          population: 20116842
-        }, {
-          city_name: "São Paulo",
-          country_name: "Brazil",
-          population: 19956590
-        }, {
-          city_name: "New York",
-          country_name: "United States",
-          population: 19831858
-        }, {
-          city_name: "Moscow",
-          country_name: "Russia",
-          population: 17000000
-        }, {
-          city_name: "Osaka-Kobe-Kyoto (Keihanshin)",
-          country_name: "Japan",
-          population: 16663000
-        }, {
-          city_name: "Kolkata",
-          country_name: "India",
-          population: 14617882
-        }, {
-          city_name: "London",
-          country_name: "United Kingdom",
-          population: 13614409
-        }, {
-          city_name: "Los Angeles",
-          country_name: "United States",
-          population: 13052921
-        }, {
-          city_name: "Buenos Aires",
-          country_name: "Argentina",
-          population: 12801364
-        }, {
-          city_name: "Dhaka",
-          country_name: "Bangladesh",
-          population: 12797394
-        }, {
-          city_name: "Paris",
-          country_name: "France",
-          population: 12161542
-        }, {
-          city_name: "Manila",
-          country_name: "Philippines",
-          population: 11855975
-        }, {
-          city_name: "Rio de Janeiro",
-          country_name: "Brazil",
-          population: 11846530
-        }, {
-          city_name: "Chicago",
-          country_name: "United States",
-          population: 9522434
-        }, {
-          city_name: "Nagoya",
-          country_name: "Japan",
-          population: 9046000
-        }, {
-          city_name: "Chennai",
-          country_name: "India",
-          population: 8917749
-        }, {
-          city_name: "Bangalore",
-          country_name: "India",
-          population: 8728906
-        }, {
-          city_name: "Lima",
-          country_name: "Peru",
-          population: 8482619
-        }, {
-          city_name: "Bogotá",
-          country_name: "Colombia",
-          population: 7881156
-        }, {
-          city_name: "Hyderabad",
-          country_name: "India",
-          population: 7749334
-        }, {
-          city_name: "Dallas–Fort Worth",
-          country_name: "United States",
-          population: 6700991
-        }, {
-          city_name: "Santiago",
-          country_name: "Chile",
-          population: 6683852
-        }, {
-          city_name: "Madrid",
-          country_name: "Spain",
-          population: 6387824
-        }, {
-          city_name: "Ahmedabad",
-          country_name: "India",
-          population: 6352254
-        }, {
-          city_name: "Houston",
-          country_name: "United States",
-          population: 6177035
-        }, {
-          city_name: "Philadelphia",
-          country_name: "United States",
-          population: 6018800
-        }, {
-          city_name: "Washington, D.C.",
-          country_name: "United States",
-          population: 5860342
-        }, {
-          city_name: "Miami",
-          country_name: "United States",
-          population: 5762717
-        }, {
-          city_name: "Toronto",
-          country_name: "Canada",
-          population: 5583064
-        }, {
-          city_name: "Belo Horizonte",
-          country_name: "Brazil",
-          population: 5504635
-        }, {
-          city_name: "Atlanta",
-          country_name: "United States",
-          population: 5457831
-        }, {
-          city_name: "Barcelona",
-          country_name: "Spain",
-          population: 5357422
-        }, {
-          city_name: "Singapore",
-          country_name: "Singapore",
-          population: 5312000
-        }, {
-          city_name: "Ruhr",
-          country_name: "Germany",
-          population: 5135136
-        }, {
-          city_name: "Berlin",
-          country_name: "Germany",
-          population: 5097712
-        }, {
-          city_name: "Pune",
-          country_name: "India",
-          population: 5049968
-        }, {
-          city_name: "Beijing",
-          country_name: "China",
-          population: 1250000
-        }, {
-          city_name: "Cairo",
-          country_name: "Egypt",
-          population: 1445000
-        }, {
-          city_name: "Hong Kong-Shenzhen",
-          country_name: "China",
-          population: 1580000
-        }, {
-          city_name: "Karachi",
-          country_name: "Pakistan",
-          population: 1180000
-        }, {
-          city_name: "Shanghai",
-          country_name: "China",
-          population: 1665000
-        }
-      ];
+    var citiesList=[{city_name:"Tokyo",country_name:"Japan",population:31714e3},{city_name:"Seoul",country_name:"South Korea",population:25721e3},{city_name:"Jakarta",country_name:"Indonesia",population:23308500},{city_name:"Delhi",country_name:"India",population:21753486},{city_name:"Mumbai",country_name:"India",population:20748395},{city_name:"Mexico City",country_name:"Mexico",population:20116842},{city_name:"São Paulo",country_name:"Brazil",population:19956590},{city_name:"New York",country_name:"United States",population:19831858},{city_name:"Moscow",country_name:"Russia",population:17e6},{city_name:"Osaka-Kobe-Kyoto (Keihanshin)",country_name:"Japan",population:16663e3},{city_name:"Kolkata",country_name:"India",population:14617882},{city_name:"London",country_name:"United Kingdom",population:13614409},{city_name:"Los Angeles",country_name:"United States",population:13052921},{city_name:"Buenos Aires",country_name:"Argentina",population:12801364},{city_name:"Dhaka",country_name:"Bangladesh",population:12797394},{city_name:"Paris",country_name:"France",population:12161542},{city_name:"Manila",country_name:"Philippines",population:11855975},{city_name:"Rio de Janeiro",country_name:"Brazil",population:11846530},{city_name:"Chicago",country_name:"United States",population:9522434},{city_name:"Nagoya",country_name:"Japan",population:9046e3},{city_name:"Chennai",country_name:"India",population:8917749},{city_name:"Bangalore",country_name:"India",population:8728906},{city_name:"Lima",country_name:"Peru",population:8482619},{city_name:"Bogotá",country_name:"Colombia",population:7881156},{city_name:"Hyderabad",country_name:"India",population:7749334},{city_name:"Dallas–Fort Worth",country_name:"United States",population:6700991},{city_name:"Santiago",country_name:"Chile",population:6683852},{city_name:"Madrid",country_name:"Spain",population:6387824},{city_name:"Ahmedabad",country_name:"India",population:6352254},{city_name:"Houston",country_name:"United States",population:6177035},{city_name:"Philadelphia",country_name:"United States",population:6018800},{city_name:"Washington, D.C.",country_name:"United States",population:5860342},{city_name:"Miami",country_name:"United States",population:5762717},{city_name:"Toronto",country_name:"Canada",population:5583064},{city_name:"Belo Horizonte",country_name:"Brazil",population:5504635},{city_name:"Atlanta",country_name:"United States",population:5457831},{city_name:"Barcelona",country_name:"Spain",population:5357422},{city_name:"Singapore",country_name:"Singapore",population:5312e3},{city_name:"Ruhr",country_name:"Germany",population:5135136},{city_name:"Berlin",country_name:"Germany",population:5097712},{city_name:"Pune",country_name:"India",population:5049968},{city_name:"Beijing",country_name:"China",population:125e4},{city_name:"Cairo",country_name:"Egypt",population:1445e3},{city_name:"Hong Kong-Shenzhen",country_name:"China",population:158e4},{city_name:"Karachi",country_name:"Pakistan",population:118e4},{city_name:"Shanghai",country_name:"China",population:1665e3}];
 
       var City;
 
@@ -308,21 +127,18 @@
           tableOptions = {
             recordWord: 'city',
             recordWordPlural: 'cities',
-            sortDir: 'asc',
+            sortDir: 'desc',
             sortField: 'population',
             perPage: 15,
-            sortIconClass: "glyphicon glyphicon-sort",
-            sortAscIconClass: "glyphicon glyphicon-sort-by-attributes",
-            sortDescIconClass: "glyphicon glyphicon-sort-by-attributes-alt"
+            unsortedClass: "glyphicon glyphicon-sort",
+            ascSortClass:  "glyphicon glyphicon-sort-by-attributes",
+            descSortClass: "glyphicon glyphicon-sort-by-attributes-alt"
           };
           rows = citiesList.map(function(row) {
             return new City(_this, row);
           });
           this.table = new DataTable(rows, tableOptions);
           ko.applyBindings(this);
-
-          $('.cloak').removeClass('cloak');
-          $('.bindingloader').remove();
         }
 
         return CitiesModel;
@@ -348,7 +164,7 @@
           <h2>Simple example</h2>
           <p>S'pose we wanted to display a table of cities. Just create a view model for the data:</p>
 
-          <pre class="pre-scrollable"><code class="coffeescript">
+<pre class="pre-scrollable">
 class City
 
   constructor: (@view, row) ->
@@ -363,7 +179,7 @@ class @CitiesModel
     tableOptions =
       recordWord:       'city'
       recordWordPlural: 'cities'
-      sortDir:          'asc'
+      sortDir:          'desc'
       sortField:        'population'
       perPage:          15
 
@@ -384,19 +200,13 @@ class @CitiesModel
       alert "Unknown error: #{errorThrown}"
       @table.loading false
 
-    ko.applyBindings @
-    $('.cloak').removeClass 'cloak'
-    $('.bindingloader').remove()
-          </code></pre>
+    ko.applyBindings @</pre>
 
           <p>And a table, like so:</p>
-          <pre class="pre-scrollable"><code class="html">
+
+<pre class="pre-scrollable">
 &lt;input type="text" data-bind="value: table.filter" placeholder="Search"/&gt;
-&lt;p class="aligncenter bindingloader"&gt;
-  &lt;i class="icon-spinner icon-spin"&gt;&lt;/i&gt;
-  Loading...
-&lt;/p&gt;
-&lt;div data-bind="with: table" class="cloak"&gt;
+&lt;div data-bind="with: table"&gt;
   &lt;table class="table table-striped table-bordered"&gt;
     &lt;thead&gt;
       &lt;tr&gt;
@@ -460,17 +270,11 @@ class @CitiesModel
   });
 
 }).call(this);
-&lt;/script&gt;
-
-          </code></pre>
+&lt;/script&gt;</pre>
 
           <h3>Result:</h3>
           <input type="text" data-bind="value: table.filter" placeholder="Search"/>
-          <p class="aligncenter bindingloader">
-            <i class="icon-spinner icon-spin"></i>
-            Loading...
-          </p>
-          <div data-bind="with: table" class="cloak">
+          <div data-bind="with: table">
             <table class="table table-striped table-bordered">
               <thead>
                 <tr>
@@ -555,22 +359,21 @@ class @CitiesModel
             <dt><code>perPage</code></dt>
             <dd>Integer indicating the number of rows to be shown per page. Default: <code>Infinity</code></dd>
 
-            <dt><code>sortIconClass</code><br /><code>sortDescIconClass</code><br /><code>sortAscIconClass</code></dt>
-            <dd>The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons. Defaults: <code>'icon icon-sort'</code>, <code>'icon icon-sort-down'</code>, <code>'icon icon-sort-down'</code> respectively (from <a href='http://fontawesome.io/'>FontAwesome</a>)</dd>
+            <dt><code>unsortedClass</code><br /><code>descSortClass</code><br /><code>ascSortClass</code></dt>
+            <dd>The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons. Default: <code>''</code> for each</dd>
           </dl>
           <p>Additionally, you can define the <code>match</code> function on the row class, and the datatable will use it for filtering. If left undefined (as in the example above), the DataTable will automatically search all columns defined on the row. E.g:</p>
           <dl>
             <dt><code>row.match:</code></dt>
-            <dd><pre><code class="coffeescript">
-              (filter) ->
-                @population().toLowerCase().indexOf(filter) >= 0 or
-                @countryName .toLowerCase().indexOf(filter) >= 0 or
-                @cityName    .toLowerCase().indexOf(filter) >= 0
-            </code></pre></dd>
+            <dd><pre>
+(filter) ->
+  @population().toLowerCase().indexOf(filter) >= 0 or
+  @countryName .toLowerCase().indexOf(filter) >= 0 or
+  @cityName    .toLowerCase().indexOf(filter) >= 0</pre></dd>
           </dl>
 
           <h2>Further Usage</h2>
-          <p>Knockout DataTable comes packaged some some advanced filtering. Below is a list of example search terms and the results returned.</p>
+          <p>Knockout DataTable comes packaged with some advanced filtering. Below is a list of example search terms and the results returned.</p>
           <dl>
             <dt><code>cityName:atlanta</code></dt>
             <dd>Results with 'atlanta' in cityName (case insensitive)</dd>

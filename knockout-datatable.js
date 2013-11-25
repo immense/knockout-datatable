@@ -30,9 +30,9 @@
         sortField: options.sortField,
         perPage: options.perPage || 15,
         filterFn: options.filterFn || void 0,
-        sortIconClass: options.sortIconClass || 'icon-sort',
-        sortDescIconClass: options.sortDescIconClass || 'icon-sort-down',
-        sortAscIconClass: options.sortAscIconClass || 'icon-sort-up'
+        unsortedClass: options.unsortedClass || '',
+        descSortClass: options.descSortClass || '',
+        ascSortClass: options.ascSortClass || ''
       };
       this.sortDir = ko.observable(this.options.sortDir);
       this.sortField = ko.observable(this.options.sortField);
@@ -157,12 +157,12 @@
         return ko.computed(function() {
           if (_this.sortField() === column) {
             if (_this.sortDir() === 'asc') {
-              return _this.options.sortAscIconClass;
+              return _this.options.ascSortClass;
             } else {
-              return _this.options.sortDescIconClass;
+              return _this.options.descSortClass;
             }
           } else {
-            return _this.options.sortIconClass;
+            return _this.options.unsortedClass;
           }
         });
       };
@@ -214,9 +214,6 @@
 
     DataTable.prototype.defaultMatch = function(filter, row, attrMap) {
       var key, val;
-      console.log(filter);
-      console.log(row);
-      console.log(attrMap);
       return ((function() {
         var _results;
         _results = [];

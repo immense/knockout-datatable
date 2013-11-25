@@ -24,9 +24,9 @@ class @DataTable
       sortField: options.sortField
       perPage: options.perPage or 15
       filterFn: options.filterFn or undefined
-      sortIconClass: options.sortIconClass or 'icon-sort'
-      sortDescIconClass: options.sortDescIconClass or 'icon-sort-down'
-      sortAscIconClass: options.sortAscIconClass or 'icon-sort-up'
+      unsortedClass: options.unsortedClass or ''
+      descSortClass: options.descSortClass or ''
+      ascSortClass: options.ascSortClass or ''
 
     @sortDir = ko.observable @options.sortDir
     @sortField = ko.observable @options.sortField
@@ -106,7 +106,7 @@ class @DataTable
     @showLoading = ko.computed => @loading()
 
     # sort arrows
-    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then @options.sortAscIconClass else @options.sortDescIconClass) else @options.sortIconClass
+    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then @options.ascSortClass else @options.descSortClass) else @options.unsortedClass
 
   toggleSort: (field) -> =>
     if @sortField() is field
@@ -130,9 +130,6 @@ class @DataTable
   pageClass: (page) -> ko.computed => 'active' if @currentPage() is page
 
   defaultMatch: (filter, row, attrMap) ->
-    console.log filter
-    console.log row
-    console.log attrMap
     (val for key, val of attrMap).some (val) ->
       primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
 
