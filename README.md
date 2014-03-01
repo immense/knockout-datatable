@@ -25,3 +25,7 @@ npm install -g grunt-cli
 npm install
 grunt
 ```
+
+## License
+
+Knockout DataTable is released under the MIT License. Please see the LICENSE file for details.
