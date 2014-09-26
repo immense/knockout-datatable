@@ -109,6 +109,7 @@ class @DataTable
     @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then @options.ascSortClass else @options.descSortClass) else @options.unsortedClass
 
   toggleSort: (field) -> =>
+    @currentPage 1
     if @sortField() is field
       @sortDir if @sortDir() is 'asc' then 'desc' else 'asc'
     else
