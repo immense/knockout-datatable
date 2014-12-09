@@ -19,14 +19,11 @@
     };
 
     function DataTable(rows, options) {
-      if (options.sortField == null) {
-        throw new Error('sortField must be supplied.');
-      }
       this.options = {
         recordWord: options.recordWord || 'record',
         recordWordPlural: options.recordWordPlural,
         sortDir: options.sortDir || 'asc',
-        sortField: options.sortField,
+        sortField: options.sortField || void 0,
         perPage: options.perPage || 15,
         filterFn: options.filterFn || void 0,
         unsortedClass: options.unsortedClass || '',
@@ -70,38 +67,42 @@
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
-          return rows.sort(function(a, b) {
-            var aVal, bVal;
-            aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
-            bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
-            if (typeof aVal === 'string') {
-              aVal = aVal.toLowerCase();
-            }
-            if (typeof bVal === 'string') {
-              bVal = bVal.toLowerCase();
-            }
-            if (_this.sortDir() === 'asc') {
-              if (aVal < bVal || aVal === '' || (aVal == null)) {
-                return -1;
-              } else {
-                if (aVal > bVal || bVal === '' || (bVal == null)) {
-                  return 1;
-                } else {
-                  return 0;
-                }
+          if ((_this.sortField() != null) && _this.sortField() !== '') {
+            return rows.sort(function(a, b) {
+              var aVal, bVal;
+              aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
+              bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
+              if (typeof aVal === 'string') {
+                aVal = aVal.toLowerCase();
               }
-            } else {
-              if (aVal < bVal || aVal === '' || (aVal == null)) {
-                return 1;
-              } else {
-                if (aVal > bVal || bVal === '' || (bVal == null)) {
+              if (typeof bVal === 'string') {
+                bVal = bVal.toLowerCase();
+              }
+              if (_this.sortDir() === 'asc') {
+                if (aVal < bVal || aVal === '' || (aVal == null)) {
                   return -1;
                 } else {
-                  return 0;
+                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                    return 1;
+                  } else {
+                    return 0;
+                  }
+                }
+              } else {
+                if (aVal < bVal || aVal === '' || (aVal == null)) {
+                  return 1;
+                } else {
+                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                    return -1;
+                  } else {
+                    return 0;
+                  }
                 }
               }
-            }
-          });
+            });
+          } else {
+            return rows;
+          }
         };
       })(this));
       this.pagedRows = ko.computed((function(_this) {

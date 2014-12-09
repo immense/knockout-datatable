@@ -13,15 +13,12 @@ class @DataTable
 
   constructor: (rows, options) ->
 
-    if not options.sortField?
-      throw new Error 'sortField must be supplied.'
-
     # set some default options if none were passed in
     @options =
       recordWord: options.recordWord or 'record'
       recordWordPlural: options.recordWordPlural
       sortDir: options.sortDir or 'asc'
-      sortField: options.sortField
+      sortField: options.sortField or undefined
       perPage: options.perPage or 15
       filterFn: options.filterFn or undefined
       unsortedClass: options.unsortedClass or ''
@@ -58,16 +55,18 @@ class @DataTable
         filterFn = @filterFn(filter)
         rows = rows.filter(filterFn)
 
-
-      rows.sort (a,b) =>
-        aVal = ko.utils.unwrapObservable a[@sortField()]
-        bVal = ko.utils.unwrapObservable b[@sortField()]
-        if typeof aVal is 'string' then aVal = aVal.toLowerCase()
-        if typeof bVal is 'string' then bVal = bVal.toLowerCase()
-        if @sortDir() is 'asc'
-          if aVal < bVal or aVal is '' or not aVal? then -1 else (if aVal > bVal or bVal is '' or not bVal? then 1 else 0)
-        else
-          if aVal < bVal or aVal is '' or not aVal? then 1 else (if aVal > bVal or bVal is '' or not bVal? then -1 else 0)
+      if @sortField()? and @sortField() isnt ''
+        rows.sort (a,b) =>
+          aVal = ko.utils.unwrapObservable a[@sortField()]
+          bVal = ko.utils.unwrapObservable b[@sortField()]
+          if typeof aVal is 'string' then aVal = aVal.toLowerCase()
+          if typeof bVal is 'string' then bVal = bVal.toLowerCase()
+          if @sortDir() is 'asc'
+            if aVal < bVal or aVal is '' or not aVal? then -1 else (if aVal > bVal or bVal is '' or not bVal? then 1 else 0)
+          else
+            if aVal < bVal or aVal is '' or not aVal? then 1 else (if aVal > bVal or bVal is '' or not bVal? then -1 else 0)
+      else
+        rows
 
     @pagedRows = ko.computed =>
       pageIndex = @currentPage() - 1
