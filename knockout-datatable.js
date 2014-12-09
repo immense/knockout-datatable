@@ -104,6 +104,11 @@
           });
         };
       })(this));
+      this.rows.subscribe((function(_this) {
+        return function() {
+          return _this.currentPage(1);
+        };
+      })(this));
       this.pagedRows = ko.computed((function(_this) {
         return function() {
           var pageIndex, perPage;
