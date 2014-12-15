@@ -3,7 +3,7 @@ class @DataTable
   primitiveCompare = (item1, item2) ->
     if not item2?
       not item1?
-    else if item1? and item2?
+    else if item1?
       if typeof item1 is 'boolean'
         item1 is item2
       else
@@ -12,6 +12,8 @@ class @DataTable
       false
 
   constructor: (rows, options) ->
+
+    pureComputed = ko.pureComputed or ko.computed
 
     if not options.sortField?
       throw new Error 'sortField must be supplied.'
@@ -34,12 +36,14 @@ class @DataTable
     @currentPage = ko.observable 1
     @filter = ko.observable ''
     @loading = ko.observable false
+    @filtering = ko.observable false
 
     @filter.subscribe => @currentPage 1
+    @perPage.subscribe => @currentPage 1
 
     @rows = ko.observableArray rows
 
-    @rowAttributeMap = ko.computed =>
+    @rowAttributeMap = pureComputed =>
       rows = @rows()
       attrMap = {}
 
@@ -50,6 +54,7 @@ class @DataTable
       attrMap
 
     @filteredRows = ko.computed =>
+      @filtering true
       filter = @filter()
 
       rows = @rows()
@@ -69,6 +74,10 @@ class @DataTable
         else
           if aVal < bVal or aVal is '' or not aVal? then 1 else (if aVal > bVal or bVal is '' or not bVal? then -1 else 0)
 
+      @filtering false
+
+      rows
+
     @pagedRows = ko.computed =>
       pageIndex = @currentPage() - 1
       perPage = @perPage()
@@ -80,9 +89,9 @@ class @DataTable
     @rightPagerClass = ko.computed => 'disabled' if @currentPage() is @pages()
 
     # info
-    @total = ko.computed => @filteredRows().length
-    @from = ko.computed => (@currentPage() - 1) * @perPage() + 1
-    @to = ko.computed =>
+    @total = pureComputed => @filteredRows().length
+    @from = pureComputed => (@currentPage() - 1) * @perPage() + 1
+    @to = pureComputed =>
       to = @currentPage() * @perPage()
       if to > @total()
         @total()
@@ -106,7 +115,16 @@ class @DataTable
     @showLoading = ko.computed => @loading()
 
     # sort arrows
-    @sortClass = (column) => ko.computed => if @sortField() is column then (if @sortDir() is 'asc' then @options.ascSortClass else @options.descSortClass) else @options.unsortedClass
+    @sortClass = (column) =>
+      ko.computed =>
+        if @sortField() is column
+          'sorted ' +
+          if @sortDir() is 'asc'
+            @options.ascSortClass
+          else
+            @options.descSortClass
+        else
+          @options.unsortedClass
 
   toggleSort: (field) -> =>
     @currentPage 1

@@ -7,7 +7,7 @@
     primitiveCompare = function(item1, item2) {
       if (item2 == null) {
         return item1 == null;
-      } else if ((item1 != null) && (item2 != null)) {
+      } else if (item1 != null) {
         if (typeof item1 === 'boolean') {
           return item1 === item2;
         } else {
@@ -19,6 +19,8 @@
     };
 
     function DataTable(rows, options) {
+      var pureComputed;
+      pureComputed = ko.pureComputed || ko.computed;
       if (options.sortField == null) {
         throw new Error('sortField must be supplied.');
       }
@@ -39,13 +41,19 @@
       this.currentPage = ko.observable(1);
       this.filter = ko.observable('');
       this.loading = ko.observable(false);
+      this.filtering = ko.observable(false);
       this.filter.subscribe((function(_this) {
         return function() {
           return _this.currentPage(1);
         };
       })(this));
+      this.perPage.subscribe((function(_this) {
+        return function() {
+          return _this.currentPage(1);
+        };
+      })(this));
       this.rows = ko.observableArray(rows);
-      this.rowAttributeMap = ko.computed((function(_this) {
+      this.rowAttributeMap = pureComputed((function(_this) {
         return function() {
           var attrMap, key, row;
           rows = _this.rows();
@@ -64,13 +72,14 @@
       this.filteredRows = ko.computed((function(_this) {
         return function() {
           var filter, filterFn;
+          _this.filtering(true);
           filter = _this.filter();
           rows = _this.rows();
           if (filter !== '') {
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
-          return rows.sort(function(a, b) {
+          rows.sort(function(a, b) {
             var aVal, bVal;
             aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
             bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
@@ -102,6 +111,8 @@
               }
             }
           });
+          _this.filtering(false);
+          return rows;
         };
       })(this));
       this.pagedRows = ko.computed((function(_this) {
@@ -131,17 +142,17 @@
           }
         };
       })(this));
-      this.total = ko.computed((function(_this) {
+      this.total = pureComputed((function(_this) {
         return function() {
           return _this.filteredRows().length;
         };
       })(this));
-      this.from = ko.computed((function(_this) {
+      this.from = pureComputed((function(_this) {
         return function() {
           return (_this.currentPage() - 1) * _this.perPage() + 1;
         };
       })(this));
-      this.to = ko.computed((function(_this) {
+      this.to = pureComputed((function(_this) {
         return function() {
           var to;
           to = _this.currentPage() * _this.perPage();
@@ -182,11 +193,7 @@
         return function(column) {
           return ko.computed(function() {
             if (_this.sortField() === column) {
-              if (_this.sortDir() === 'asc') {
-                return _this.options.ascSortClass;
-              } else {
-                return _this.options.descSortClass;
-              }
+              return 'sorted ' + (_this.sortDir() === 'asc' ? _this.options.ascSortClass : _this.options.descSortClass);
             } else {
               return _this.options.unsortedClass;
             }

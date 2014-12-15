@@ -182,6 +182,9 @@ class @CitiesModel
       sortDir:          'desc'
       sortField:        'population'
       perPage:          15
+      unsortedClass:    'glyphicon glyphicon-sort'
+      ascSortClass:     'glyphicon glyphicon-sort-by-attributes'
+      descSortClass:    'glyphicon glyphicon-sort-by-attributes-alt'
 
     @table = new DataTable [], tableOptions
     @table.loading true
@@ -385,9 +388,6 @@ class @CitiesModel
             <dd>Results with 'japan' in countryName and '6' somewhere in one of the columns (case insensitive)</dd>
           </dl>
         </div>
-      </div>
-      <div class='footer'>
-        <p>&copy; Immense Networks 2013</p>
       </div>
     </div>
   </body>
