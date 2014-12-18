@@ -54,7 +54,7 @@ grunt
 
 ## Contributors
 
-See [Contributors](wiki/Contributors)
+See [[Contributors|Contributors]]
 
 ## License
 
