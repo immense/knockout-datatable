@@ -208,7 +208,11 @@ class @CitiesModel
           <p>And a table, like so:</p>
 
 <pre class="pre-scrollable">
-&lt;input type="text" data-bind="value: table.filter" placeholder="Search"/&gt;
+&lt;div class=&quot;pull-right&quot;&gt;
+    &lt;strong&gt;Results per page&lt;/strong&gt;
+    &lt;select data-bind=&quot;options: [10,25,50], value: table.perPage&quot;&gt;&lt;/select&gt;
+&lt;/div&gt;
+&lt;input type="text" data-bind="value: table.filter, valueUpdate: 'afterkeydown'" placeholder="Search"/&gt;
 &lt;div data-bind="with: table"&gt;
   &lt;table class="table table-striped table-bordered"&gt;
     &lt;thead&gt;
@@ -276,7 +280,11 @@ class @CitiesModel
 &lt;/script&gt;</pre>
 
           <h3>Result:</h3>
-          <input type="text" data-bind="value: table.filter" placeholder="Search"/>
+		  <div class="pull-right">
+                <strong>Results per page</strong>
+                <select data-bind="options: [10,25,50], value: table.perPage"></select>
+          </div>
+          <input type="text" data-bind="value: table.filter, valueUpdate: 'afterkeydown'" placeholder="Search"/>
           <div data-bind="with: table">
             <table class="table table-striped table-bordered">
               <thead>

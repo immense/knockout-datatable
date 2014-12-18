@@ -1,5 +1,7 @@
 class @DataTable
 
+  pureComputed = ko.pureComputed or ko.computed
+  
   primitiveCompare = (item1, item2) ->
     if not item2?
       not item1?
@@ -12,8 +14,6 @@ class @DataTable
       false
 
   constructor: (rows, options) ->
-
-    pureComputed = ko.pureComputed or ko.computed
 
     if not options.sortField?
       throw new Error 'sortField must be supplied.'
@@ -53,7 +53,7 @@ class @DataTable
 
       attrMap
 
-    @filteredRows = ko.computed =>
+    @filteredRows = pureComputed =>
       @filtering true
       filter = @filter()
 
@@ -78,15 +78,15 @@ class @DataTable
 
       rows
 
-    @pagedRows = ko.computed =>
+    @pagedRows = pureComputed =>
       pageIndex = @currentPage() - 1
       perPage = @perPage()
       @filteredRows().slice pageIndex * perPage, (pageIndex+1) * perPage
 
-    @pages = ko.computed => Math.ceil @filteredRows().length / @perPage()
+    @pages = pureComputed => Math.ceil @filteredRows().length / @perPage()
 
-    @leftPagerClass = ko.computed => 'disabled' if @currentPage() is 1
-    @rightPagerClass = ko.computed => 'disabled' if @currentPage() is @pages()
+    @leftPagerClass = pureComputed => 'disabled' if @currentPage() is 1
+    @rightPagerClass = pureComputed => 'disabled' if @currentPage() is @pages()
 
     # info
     @total = pureComputed => @filteredRows().length
@@ -98,7 +98,7 @@ class @DataTable
       else
         to
 
-    @recordsText = ko.computed =>
+    @recordsText = pureComputed =>
       pages = @pages()
       total = @total()
       from = @from()
@@ -111,12 +111,12 @@ class @DataTable
         "#{total} #{if total > 1 or total is 0 then recordWordPlural else recordWord}"
 
     # state info
-    @showNoData  = ko.computed => @pagedRows().length is 0 and not @loading()
-    @showLoading = ko.computed => @loading()
+    @showNoData  = pureComputed => @pagedRows().length is 0 and not @loading()
+    @showLoading = pureComputed => @loading()
 
     # sort arrows
     @sortClass = (column) =>
-      ko.computed =>
+      pureComputed =>
         if @sortField() is column
           'sorted ' +
           if @sortDir() is 'asc'
@@ -146,7 +146,7 @@ class @DataTable
 
   gotoPage: (page) -> => @currentPage page
 
-  pageClass: (page) -> ko.computed => 'active' if @currentPage() is page
+  pageClass: (page) -> pureComputed => 'active' if @currentPage() is page
 
   defaultMatch: (filter, row, attrMap) ->
     (val for key, val of attrMap).some (val) ->
@@ -172,13 +172,12 @@ class @DataTable
           filter.push word
       filter = filter.join(' ')
       defaultMatch = @defaultMatch
-      attrMap = @rowAttributeMap()
-      return (row) ->
+      return (row) =>
         conditionals = for key, val of specials
           do (key, val) =>
-            if rowAttr = attrMap[key.toLowerCase()] # If the current key (lowercased) is in the attr map
+            if rowAttr = @rowAttributeMap()[key.toLowerCase()] # If the current key (lowercased) is in the attr map
               primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
             else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
               false
         # console.log conditionals
-        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row, attrMap)) else true)
+        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row, @rowAttributeMap())) else true)
