@@ -54,7 +54,7 @@ class @DataTable
       @filtering true
       filter = @filter()
 
-      rows = @rows()
+      rows = @rows.slice(0)
 
       if filter isnt ''
         filterFn = @filterFn(filter)
