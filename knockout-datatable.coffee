@@ -1,7 +1,7 @@
 class @DataTable
 
   pureComputed = ko.pureComputed or ko.computed
-  
+
   primitiveCompare = (item1, item2) ->
     if not item2?
       not item1?
@@ -146,6 +146,15 @@ class @DataTable
   gotoPage: (page) -> => @currentPage page
 
   pageClass: (page) -> pureComputed => 'active' if @currentPage() is page
+
+  addRecord: (record) -> @rows.push record
+
+  removeRecord: (record) -> @rows.remove record
+
+  replaceRows: (rows) ->
+    @rows rows
+    @currentPage 1
+    @filter undefined
 
   defaultMatch: (filter, row, attrMap) ->
     (val for key, val of attrMap).some (val) ->

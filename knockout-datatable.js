@@ -251,6 +251,20 @@
       })(this));
     };
 
+    DataTable.prototype.addRecord = function(record) {
+      return this.rows.push(record);
+    };
+
+    DataTable.prototype.removeRecord = function(record) {
+      return this.rows.remove(record);
+    };
+
+    DataTable.prototype.replaceRows = function(rows) {
+      this.rows(rows);
+      this.currentPage(1);
+      return this.filter(void 0);
+    };
+
     DataTable.prototype.defaultMatch = function(filter, row, attrMap) {
       var key, val;
       return ((function() {
