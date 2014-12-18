@@ -132,6 +132,14 @@ class @DataTable
 
   pageClass: (page) -> ko.computed => 'active' if @currentPage() is page
 
+  addRecord: (record) -> @rows.push record
+
+  removeRecord: (record) -> @rows.remove record
+
+  replaceRows: (rows) ->
+    @rows rows
+    @currentPage 1
+
   defaultMatch: (filter, row, attrMap) ->
     (val for key, val of attrMap).some (val) ->
       primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
