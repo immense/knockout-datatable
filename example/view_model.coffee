@@ -25,25 +25,24 @@ class @ExampleModel
     @exampleTable = new DataTable [], tableOptions
     @exampleTable.loading true
 
-    req = $.getJSON "/api/rows"
+    req = new XMLHttpRequest()
+    req.open 'GET', '/api/cities', true
 
-    req.done (response) =>
-      if response.error?
-        messenger.error 'Unable to retrieve rows.'
+    req.onload = =>
+      if req.status >= 200 and req.status < 400
+        response = JSON.parse req.responseText
+        rows = response.results.map (row) => new City @, row
+        @table.rows rows
+        @table.loading false
       else
-        rows = response.results.map (row) => new Row @, row
-        @exampleTable.rows rows
-      @exampleTable.loading false
+        alert "Error communicating with server"
+        @table.loading false
 
-    req.fail (jqXHR, textStatus, errorThrown) =>
-      messenger.error "Unknown error: #{errorThrown}"
-      @exampleTable.loading false
+    req.onerror = =>
+      alert "Error communicating with server"
+      @table.loading false
 
-    @filter = ko.observable ''
-
-    ko.computed =>
-      @exampleTable.filter @filter()
-    .extend throttle: 250
+    req.send()
 
     ko.applyBindings @
     $('.cloak').removeClass 'cloak'

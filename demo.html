@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
     <title>Knockout DataTable Demo</title>
-    <link rel='stylesheet' type='text/css' href='http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css'>
+    <link rel='stylesheet' type='text/css' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
     <link rel='stylesheet' type='text/css' href='knockout-datatable.css'>
-    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/knockout/2.3.0/knockout-min.js'></script>
+    <script src='http://knockoutjs.com/downloads/knockout-3.2.0.js'></script>
     <script src='knockout-datatable.min.js'></script>
     <style type='text/css'>
       /* yanked from bootstrap demos: http://getbootstrap.com/examples/jumbotron-narrow/ */
@@ -138,7 +139,7 @@
             return new City(_this, row);
           });
           this.table = new DataTable(rows, tableOptions);
-          ko.applyBindings(this, $('#sorted-table')[0]);
+          ko.applyBindings(this, document.getElementById('sorted-table'));
         }
 
         return CitiesModel;
@@ -159,7 +160,7 @@
             return new City(_this, row);
           });
           this.table = new DataTable(rows, tableOptions);
-          ko.applyBindings(this, $('#unsorted-table')[0]);
+          ko.applyBindings(this, document.getElementById('unsorted-table'));
         }
 
         return CitiesModelUnsorted;
@@ -210,31 +211,36 @@ class @CitiesModel
     @table = new DataTable [], tableOptions
     @table.loading true
 
-    req = $.getJSON "/api/cities"
+    req = new XMLHttpRequest()
+    req.open 'GET', '/api/cities', true
 
-    req.done (response) =>
-      if response.error?
-        alert 'Unable to retrieve cities.'
-      else
+    req.onload = =>
+      if req.status >= 200 and req.status < 400
+        response = JSON.parse req.responseText
         rows = response.results.map (row) => new City @, row
         @table.rows rows
+        @table.loading false
+      else
+        alert "Error communicating with server"
+        @table.loading false
+
+    req.onerror = =>
+      alert "Error communicating with server"
       @table.loading false
 
-    req.fail (jqXHR, textStatus, errorThrown) =>
-      alert "Unknown error: #{errorThrown}"
-      @table.loading false
+    req.send()
 
     ko.applyBindings @</pre>
 
           <p>And a table, like so:</p>
 
 <pre class="pre-scrollable">
-&lt;div class=&quot;pull-right&quot;&gt;
-    &lt;strong&gt;Results per page&lt;/strong&gt;
-    &lt;select data-bind=&quot;options: [10,25,50], value: table.perPage&quot;&gt;&lt;/select&gt;
-&lt;/div&gt;
-&lt;input type="text" data-bind="value: table.filter, valueUpdate: 'afterkeydown'" placeholder="Search"/&gt;
 &lt;div data-bind="with: table"&gt;
+  &lt;div class=&quot;pull-right&quot;&gt;
+    &lt;strong&gt;Results per page&lt;/strong&gt;
+    &lt;select data-bind=&quot;options: [10,25,50], value: perPage&quot;&gt;&lt;/select&gt;
+  &lt;/div&gt;
+  &lt;input type="text" data-bind="textInput: filter" placeholder="Search"/&gt;
   &lt;table class="table table-striped table-bordered"&gt;
     &lt;thead&gt;
       &lt;tr&gt;
@@ -291,13 +297,9 @@ class @CitiesModel
   &lt;/div&gt;
 &lt;/div&gt;
 &lt;script type="text/javascript"&gt;
-(function() {
-
-  $(function() {
-    new CitiesModel();
-  });
-
-}).call(this);
+document.addEventListener('DOMContentLoaded', function(){
+  new CitiesModel();
+});
 &lt;/script&gt;</pre>
 
           <h3>Result:</h3>
@@ -306,7 +308,7 @@ class @CitiesModel
               <strong>Results per page</strong>
               <select data-bind="options: [10,25,50], value: perPage"></select>
             </div>
-            <input type="text" data-bind="value: filter, valueUpdate: 'afterkeydown'" placeholder="Search"/>
+            <input type="text" data-bind="textInput: filter" placeholder="Search"/>
             <table class="table table-striped table-bordered">
               <thead>
                 <tr>
@@ -363,13 +365,9 @@ class @CitiesModel
             </div>
           </div>
           <script type="text/javascript">
-          (function() {
-
-            $(function() {
-              window.view = new CitiesModel();
-            });
-
-          }).call(this);
+          document.addEventListener('DOMContentLoaded', function(){
+            window.view = new CitiesModel();
+          });
           </script>
 
 
@@ -379,7 +377,7 @@ class @CitiesModel
               <strong>Results per page</strong>
               <select data-bind="options: [10,25,50], value: perPage"></select>
             </div>
-            <input type="text" data-bind="value: filter" placeholder="Search"/>
+            <input type="text" data-bind="textInput: filter" placeholder="Search"/>
             <table class="table table-striped table-bordered">
               <thead>
                 <tr>
@@ -433,13 +431,9 @@ class @CitiesModel
             </div>
           </div>
           <script type="text/javascript">
-          (function() {
-
-            $(function() {
-              window.unsorted_cities = new CitiesModelUnsorted();
-            });
-
-          }).call(this);
+          document.addEventListener('DOMContentLoaded', function(){
+            window.unsorted_cities = new CitiesModelUnsorted();
+          });
           </script>
 
 
