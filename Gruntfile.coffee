@@ -18,6 +18,9 @@ module.exports = (grunt) ->
     # uglifyjs files
     uglify:
       datatable:
+        options: 
+            sourceMap: true,
+      
         src: 'knockout-datatable.js'
         dest: 'knockout-datatable.min.js'
   }
