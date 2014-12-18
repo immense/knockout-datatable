@@ -2,12 +2,14 @@
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   this.DataTable = (function() {
-    var primitiveCompare;
+    var primitiveCompare, pureComputed;
+
+    pureComputed = ko.pureComputed || ko.computed;
 
     primitiveCompare = function(item1, item2) {
       if (item2 == null) {
         return item1 == null;
-      } else if ((item1 != null) && (item2 != null)) {
+      } else if (item1 != null) {
         if (typeof item1 === 'boolean') {
           return item1 === item2;
         } else {
@@ -19,14 +21,11 @@
     };
 
     function DataTable(rows, options) {
-      if (options.sortField == null) {
-        throw new Error('sortField must be supplied.');
-      }
       this.options = {
         recordWord: options.recordWord || 'record',
         recordWordPlural: options.recordWordPlural,
         sortDir: options.sortDir || 'asc',
-        sortField: options.sortField,
+        sortField: options.sortField || void 0,
         perPage: options.perPage || 15,
         filterFn: options.filterFn || void 0,
         unsortedClass: options.unsortedClass || '',
@@ -39,13 +38,19 @@
       this.currentPage = ko.observable(1);
       this.filter = ko.observable('');
       this.loading = ko.observable(false);
+      this.filtering = ko.observable(false);
       this.filter.subscribe((function(_this) {
         return function() {
           return _this.currentPage(1);
         };
       })(this));
+      this.perPage.subscribe((function(_this) {
+        return function() {
+          return _this.currentPage(1);
+        };
+      })(this));
       this.rows = ko.observableArray(rows);
-      this.rowAttributeMap = ko.computed((function(_this) {
+      this.rowAttributeMap = pureComputed((function(_this) {
         return function() {
           var attrMap, key, row;
           rows = _this.rows();
@@ -61,50 +66,57 @@
           return attrMap;
         };
       })(this));
-      this.filteredRows = ko.computed((function(_this) {
+      this.filteredRows = pureComputed((function(_this) {
         return function() {
           var filter, filterFn;
+          _this.filtering(true);
           filter = _this.filter();
-          rows = _this.rows();
+          rows = _this.rows.slice(0);
           if (filter !== '') {
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
-          return rows.sort(function(a, b) {
-            var aVal, bVal;
-            aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
-            bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
-            if (typeof aVal === 'string') {
-              aVal = aVal.toLowerCase();
-            }
-            if (typeof bVal === 'string') {
-              bVal = bVal.toLowerCase();
-            }
-            if (_this.sortDir() === 'asc') {
-              if (aVal < bVal || aVal === '' || (aVal == null)) {
-                return -1;
-              } else {
-                if (aVal > bVal || bVal === '' || (bVal == null)) {
-                  return 1;
-                } else {
-                  return 0;
-                }
+          if ((_this.sortField() != null) && _this.sortField() !== '') {
+            rows.sort(function(a, b) {
+              var aVal, bVal;
+              aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
+              bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
+              if (typeof aVal === 'string') {
+                aVal = aVal.toLowerCase();
               }
-            } else {
-              if (aVal < bVal || aVal === '' || (aVal == null)) {
-                return 1;
-              } else {
-                if (aVal > bVal || bVal === '' || (bVal == null)) {
+              if (typeof bVal === 'string') {
+                bVal = bVal.toLowerCase();
+              }
+              if (_this.sortDir() === 'asc') {
+                if (aVal < bVal || aVal === '' || (aVal == null)) {
                   return -1;
                 } else {
-                  return 0;
+                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                    return 1;
+                  } else {
+                    return 0;
+                  }
+                }
+              } else {
+                if (aVal < bVal || aVal === '' || (aVal == null)) {
+                  return 1;
+                } else {
+                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                    return -1;
+                  } else {
+                    return 0;
+                  }
                 }
               }
-            }
-          });
+            });
+          } else {
+            rows;
+          }
+          _this.filtering(false);
+          return rows;
         };
       })(this));
-      this.pagedRows = ko.computed((function(_this) {
+      this.pagedRows = pureComputed((function(_this) {
         return function() {
           var pageIndex, perPage;
           pageIndex = _this.currentPage() - 1;
@@ -112,36 +124,36 @@
           return _this.filteredRows().slice(pageIndex * perPage, (pageIndex + 1) * perPage);
         };
       })(this));
-      this.pages = ko.computed((function(_this) {
+      this.pages = pureComputed((function(_this) {
         return function() {
           return Math.ceil(_this.filteredRows().length / _this.perPage());
         };
       })(this));
-      this.leftPagerClass = ko.computed((function(_this) {
+      this.leftPagerClass = pureComputed((function(_this) {
         return function() {
           if (_this.currentPage() === 1) {
             return 'disabled';
           }
         };
       })(this));
-      this.rightPagerClass = ko.computed((function(_this) {
+      this.rightPagerClass = pureComputed((function(_this) {
         return function() {
           if (_this.currentPage() === _this.pages()) {
             return 'disabled';
           }
         };
       })(this));
-      this.total = ko.computed((function(_this) {
+      this.total = pureComputed((function(_this) {
         return function() {
           return _this.filteredRows().length;
         };
       })(this));
-      this.from = ko.computed((function(_this) {
+      this.from = pureComputed((function(_this) {
         return function() {
           return (_this.currentPage() - 1) * _this.perPage() + 1;
         };
       })(this));
-      this.to = ko.computed((function(_this) {
+      this.to = pureComputed((function(_this) {
         return function() {
           var to;
           to = _this.currentPage() * _this.perPage();
@@ -152,7 +164,7 @@
           }
         };
       })(this));
-      this.recordsText = ko.computed((function(_this) {
+      this.recordsText = pureComputed((function(_this) {
         return function() {
           var from, pages, recordWord, recordWordPlural, to, total;
           pages = _this.pages();
@@ -168,25 +180,21 @@
           }
         };
       })(this));
-      this.showNoData = ko.computed((function(_this) {
+      this.showNoData = pureComputed((function(_this) {
         return function() {
           return _this.pagedRows().length === 0 && !_this.loading();
         };
       })(this));
-      this.showLoading = ko.computed((function(_this) {
+      this.showLoading = pureComputed((function(_this) {
         return function() {
           return _this.loading();
         };
       })(this));
       this.sortClass = (function(_this) {
         return function(column) {
-          return ko.computed(function() {
+          return pureComputed(function() {
             if (_this.sortField() === column) {
-              if (_this.sortDir() === 'asc') {
-                return _this.options.ascSortClass;
-              } else {
-                return _this.options.descSortClass;
-              }
+              return 'sorted ' + (_this.sortDir() === 'asc' ? _this.options.ascSortClass : _this.options.descSortClass);
             } else {
               return _this.options.unsortedClass;
             }
@@ -234,13 +242,27 @@
     };
 
     DataTable.prototype.pageClass = function(page) {
-      return ko.computed((function(_this) {
+      return pureComputed((function(_this) {
         return function() {
           if (_this.currentPage() === page) {
             return 'active';
           }
         };
       })(this));
+    };
+
+    DataTable.prototype.addRecord = function(record) {
+      return this.rows.push(record);
+    };
+
+    DataTable.prototype.removeRecord = function(record) {
+      return this.rows.remove(record);
+    };
+
+    DataTable.prototype.replaceRows = function(rows) {
+      this.rows(rows);
+      this.currentPage(1);
+      return this.filter(void 0);
     };
 
     DataTable.prototype.defaultMatch = function(filter, row, attrMap) {
@@ -259,7 +281,7 @@
     };
 
     DataTable.prototype.filterFn = function(filterVar) {
-      var attrMap, defaultMatch, filter, specials, _ref;
+      var defaultMatch, filter, specials, _ref;
       if (this.options.filterFn != null) {
         return this.options.filterFn(filterVar);
       } else {
@@ -291,29 +313,30 @@
         });
         filter = filter.join(' ');
         defaultMatch = this.defaultMatch;
-        attrMap = this.rowAttributeMap();
-        return function(row) {
-          var conditionals, key, val;
-          conditionals = (function() {
-            var _results;
-            _results = [];
-            for (key in specials) {
-              val = specials[key];
-              _results.push((function(_this) {
-                return function(key, val) {
-                  var rowAttr;
-                  if (rowAttr = attrMap[key.toLowerCase()]) {
-                    return primitiveCompare((ko.isObservable(row[rowAttr]) ? row[rowAttr]() : row[rowAttr]), val);
-                  } else {
-                    return false;
-                  }
-                };
-              })(this)(key, val));
-            }
-            return _results;
-          }).call(this);
-          return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : defaultMatch(filter, row, attrMap)) : true);
-        };
+        return (function(_this) {
+          return function(row) {
+            var conditionals, key, val;
+            conditionals = (function() {
+              var _results;
+              _results = [];
+              for (key in specials) {
+                val = specials[key];
+                _results.push((function(_this) {
+                  return function(key, val) {
+                    var rowAttr;
+                    if (rowAttr = _this.rowAttributeMap()[key.toLowerCase()]) {
+                      return primitiveCompare((ko.isObservable(row[rowAttr]) ? row[rowAttr]() : row[rowAttr]), val);
+                    } else {
+                      return false;
+                    }
+                  };
+                })(this)(key, val));
+              }
+              return _results;
+            }).call(_this);
+            return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+          };
+        })(this);
       }
     };
 

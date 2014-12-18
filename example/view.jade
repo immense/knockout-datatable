@@ -4,13 +4,12 @@ mixin th-sortable(field)
     |&nbsp;
     i(data-bind="css: sortClass('#{field}')")
 
-input(type='text', data-bind='instant: filter')
-
 p.aligncenter.bindingloader
   i.icon-spinner.icon-spin
   |&nbsp;Loading...
 
 div.cloak(data-bind='with: exampleTable')
+  input(type='text', data-bind='textInput: filter')
   table.table.table-striped
     thead
       tr

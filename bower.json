@@ -1,6 +1,14 @@
 {
   "name": "knockout-datatable",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": false,
-  "license": "MIT"
+  "license": "MIT",
+  "ignore": [
+    ".gitignore",
+    "demo.html",
+    "Gruntfile.coffee",
+    "README.md",
+    "example",
+    "node_modules"
+  ]
 }
