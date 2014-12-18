@@ -58,7 +58,6 @@ class @DataTable
         filterFn = @filterFn(filter)
         rows = rows.filter(filterFn)
 
-
       rows.sort (a,b) =>
         aVal = ko.utils.unwrapObservable a[@sortField()]
         bVal = ko.utils.unwrapObservable b[@sortField()]
@@ -68,8 +67,6 @@ class @DataTable
           if aVal < bVal or aVal is '' or not aVal? then -1 else (if aVal > bVal or bVal is '' or not bVal? then 1 else 0)
         else
           if aVal < bVal or aVal is '' or not aVal? then 1 else (if aVal > bVal or bVal is '' or not bVal? then -1 else 0)
-
-    @rows.subscribe => @currentPage 1
 
     @pagedRows = ko.computed =>
       pageIndex = @currentPage() - 1
@@ -139,6 +136,7 @@ class @DataTable
   replaceRows: (rows) ->
     @rows rows
     @currentPage 1
+    @filter undefined
 
   defaultMatch: (filter, row, attrMap) ->
     (val for key, val of attrMap).some (val) ->

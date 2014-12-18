@@ -104,11 +104,6 @@
           });
         };
       })(this));
-      this.rows.subscribe((function(_this) {
-        return function() {
-          return _this.currentPage(1);
-        };
-      })(this));
       this.pagedRows = ko.computed((function(_this) {
         return function() {
           var pageIndex, perPage;
@@ -258,7 +253,8 @@
 
     DataTable.prototype.replaceRows = function(rows) {
       this.rows(rows);
-      return this.currentPage(1);
+      this.currentPage(1);
+      return this.filter(void 0);
     };
 
     DataTable.prototype.defaultMatch = function(filter, row, attrMap) {
