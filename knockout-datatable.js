@@ -65,7 +65,7 @@
         return function() {
           var filter, filterFn;
           filter = _this.filter();
-          rows = _this.rows();
+          rows = _this.rows.slice(0);
           if (filter !== '') {
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
