@@ -9,6 +9,8 @@
     "Gruntfile.coffee",
     "README.md",
     "example",
-    "node_modules"
+    "node_modules",
+    "knockout-datatable.min.js.map",
+    "knockout-datatable.coffee"
   ]
 }
