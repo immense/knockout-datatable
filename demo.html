@@ -138,10 +138,31 @@
             return new City(_this, row);
           });
           this.table = new DataTable(rows, tableOptions);
-          ko.applyBindings(this);
+          ko.applyBindings(this, $('#sorted-table')[0]);
         }
 
         return CitiesModel;
+
+      })();
+
+      this.CitiesModelUnsorted = (function() {
+
+        function CitiesModelUnsorted() {
+          var rows, tableOptions,
+            _this = this;
+          tableOptions = {
+            recordWord: 'city',
+            recordWordPlural: 'cities',
+            perPage: 15
+          };
+          rows = citiesList.map(function(row) {
+            return new City(_this, row);
+          });
+          this.table = new DataTable(rows, tableOptions);
+          ko.applyBindings(this, $('#unsorted-table')[0]);
+        }
+
+        return CitiesModelUnsorted;
 
       })();
     </script>
@@ -280,12 +301,12 @@ class @CitiesModel
 &lt;/script&gt;</pre>
 
           <h3>Result:</h3>
-		  <div class="pull-right">
-                <strong>Results per page</strong>
-                <select data-bind="options: [10,25,50], value: table.perPage"></select>
-          </div>
-          <input type="text" data-bind="value: table.filter, valueUpdate: 'afterkeydown'" placeholder="Search"/>
-          <div data-bind="with: table">
+          <div id="sorted-table" data-bind="with: table">
+            <div class="pull-right">
+              <strong>Results per page</strong>
+              <select data-bind="options: [10,25,50], value: perPage"></select>
+            </div>
+            <input type="text" data-bind="value: filter, valueUpdate: 'afterkeydown'" placeholder="Search"/>
             <table class="table table-striped table-bordered">
               <thead>
                 <tr>
@@ -352,6 +373,76 @@ class @CitiesModel
           </script>
 
 
+          <h3>Example without sorting</h3>
+          <div id="unsorted-table" data-bind="with: table">
+            <div class="pull-right">
+              <strong>Results per page</strong>
+              <select data-bind="options: [10,25,50], value: perPage"></select>
+            </div>
+            <input type="text" data-bind="value: filter" placeholder="Search"/>
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th style="width: 34%;">
+                    City
+                  </th>
+                  <th style="width: 33%;">
+                    Country
+                  </th>
+                  <th style="width: 33%;">
+                    Population
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-bind="visible: showNoData">
+                  <td colspan="3" class="aligncenter">
+                    This table has no data.
+                  </td>
+                </tr>
+                <tr data-bind="visible: showLoading">
+                  <td colspan="3" class="aligncenter">
+                    <i data-bind="css: {'icon-spin': showLoading}" class="icon-spinner"></i>
+                    Loading data...
+                  </td>
+                </tr>
+                <!-- ko foreach: {data: pagedRows, as: '$row'}  -->
+                <tr>
+                  <td data-bind="text: $row.cityName"></td>
+                  <td data-bind="text: $row.countryName"></td>
+                  <td data-bind="text: $row.population"></td>
+                </tr>
+                <!-- /ko -->
+              </tbody>
+            </table>
+            <span data-bind="text: recordsText" class="label label-info pull-right"></span>
+            <div data-bind="visible: pages() > 1">
+              <ul class="pagination">
+                <li data-bind="css: leftPagerClass, click: prevPage">
+                  <a href="#">&laquo;</a>
+                </li>
+                <!-- ko foreach: {data: (new Array(pages()))} -->
+                <li data-bind="css: $parent.pageClass($index() + 1)">
+                  <a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"></a>
+                </li>
+                <!-- /ko -->
+                <li data-bind="css: rightPagerClass, click: nextPage">
+                  <a href="#">&raquo;</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <script type="text/javascript">
+          (function() {
+
+            $(function() {
+              window.unsorted_cities = new CitiesModelUnsorted();
+            });
+
+          }).call(this);
+          </script>
+
+
           <h2>Options</h2>
           <p>When instanciating with <code>new DataTable</code> you have can pass in the following options as the second parameter:</p>
           <dl class='dl-horizontal'>
@@ -365,10 +456,10 @@ class @CitiesModel
             <dd>The initial sorting direction for the table. Default: <code>'asc'</code></dd>
 
             <dt><code>sortField</code></dt>
-            <dd>The initial sorting column for the table. This setting is required, and the table will raise 'sortField must be supplied' error if sortfield is left unset.</dd>
+            <dd>The initial sorting column for the table. As of v0.5.0, this setting is optional and the order of <code>table.rows</code> will be maintained and sorting will be disabled.</dd>
 
             <dt><code>perPage</code></dt>
-            <dd>Integer indicating the number of rows to be shown per page. Default: <code>Infinity</code></dd>
+            <dd>Integer indicating the number of rows to be shown per page. Default: <code>15</code></dd>
 
             <dt><code>unsortedClass</code><br /><code>descSortClass</code><br /><code>ascSortClass</code></dt>
             <dd>The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons. Default: <code>''</code> for each</dd>
