@@ -54,7 +54,7 @@ grunt
 
 ## Contributors
 
-See [[Contributors|Contributors]]
+See [Contributors](https://github.com/immense/knockout-datatable/wiki/Contributors)
 
 ## License
 
