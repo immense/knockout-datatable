@@ -256,7 +256,10 @@
     };
 
     DataTable.prototype.removeRecord = function(record) {
-      return this.rows.remove(record);
+      this.rows.remove(record);
+      if (this.pagedRows().length === 0) {
+        return this.prevPage();
+      }
     };
 
     DataTable.prototype.replaceRows = function(rows) {

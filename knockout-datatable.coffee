@@ -149,7 +149,10 @@ class @DataTable
 
   addRecord: (record) -> @rows.push record
 
-  removeRecord: (record) -> @rows.remove record
+  removeRecord: (record) ->
+    @rows.remove record
+    if @pagedRows().length is 0
+      @prevPage()
 
   replaceRows: (rows) ->
     @rows rows
