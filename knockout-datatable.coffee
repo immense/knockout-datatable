@@ -15,30 +15,55 @@ class @DataTable
 
   constructor: (rows, options) ->
 
+    if 'object' is typeof rows
+      options = rows
+      rows = []
+    else if 'undefined' is typeof rows
+      options = {}
+      rows = []
+
     # set some default options if none were passed in
     @options =
-      recordWord: options.recordWord or 'record'
+      recordWord:       options.recordWord    or 'record'
       recordWordPlural: options.recordWordPlural
-      sortDir: options.sortDir or 'asc'
-      sortField: options.sortField or undefined
-      perPage: options.perPage or 15
-      filterFn: options.filterFn or undefined
-      unsortedClass: options.unsortedClass or ''
-      descSortClass: options.descSortClass or ''
-      ascSortClass: options.ascSortClass or ''
+      sortDir:          options.sortDir       or 'asc'
+      sortField:        options.sortField     or undefined
+      perPage:          options.perPage       or 15
+      filterFn:         options.filterFn      or undefined
+      unsortedClass:    options.unsortedClass or ''
+      descSortClass:    options.descSortClass or ''
+      ascSortClass:     options.ascSortClass  or ''
 
-    @sortDir = ko.observable @options.sortDir
-    @sortField = ko.observable @options.sortField
-    @perPage = ko.observable @options.perPage
+    @initObservables()
+
+    if (serverSideOpts = options.serverSidePagination) and serverSideOpts.enabled
+      unless serverSideOpts.path and serverSideOpts.loader
+        throw new Error("`path` or `loader` missing from `serverSidePagination` object")
+      @options.paginationPath  = serverSideOpts.path
+      @options.resultHandlerFn = serverSideOpts.loader
+
+      # if server-side pagination enabled, we don't care about the initial rows
+      @initWithServerSidePagination()
+
+    else
+      @initWithClientSidePagination(rows)
+
+  initObservables: ->
+    @sortDir     = ko.observable @options.sortDir
+    @sortField   = ko.observable @options.sortField
+    @perPage     = ko.observable @options.perPage
     @currentPage = ko.observable 1
-    @filter = ko.observable ''
-    @loading = ko.observable false
+    @filter      = ko.observable ''
+    @loading     = ko.observable false
+    @rows        = ko.observableArray []
+
+  initWithClientSidePagination: (rows) ->
     @filtering = ko.observable false
 
     @filter.subscribe => @currentPage 1
     @perPage.subscribe => @currentPage 1
 
-    @rows = ko.observableArray rows
+    @rows rows
 
     @rowAttributeMap = pureComputed =>
       rows = @rows()
@@ -125,6 +150,139 @@ class @DataTable
         else
           @options.unsortedClass
 
+    @addRecord = (record) => @rows.push record
+
+    @removeRecord = (record) =>
+      @rows.remove record
+      if @pagedRows().length is 0
+        @prevPage()
+
+    @replaceRows = (rows) =>
+      @rows rows
+      @currentPage 1
+      @filter undefined
+
+    _defaultMatch = (filter, row, attrMap) ->
+      (val for key, val of attrMap).some (val) ->
+        primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
+
+    @filterFn = @options.filterFn or (filterVar) =>
+      # Split up filterVar into :-based conditionals and a filter
+      [filter, specials] = [[],{}]
+      filterVar.split(' ').forEach (word) ->
+        if word.indexOf(':') >= 0
+          words = word.split(':')
+          specials[words[0]] = switch words[1].toLowerCase()
+            when 'yes', 'true' then true
+            when 'no', 'false' then false
+            when 'blank', 'none', 'null', 'undefined' then undefined
+            else words[1].toLowerCase()
+        else
+          filter.push word
+      filter = filter.join(' ')
+      return (row) =>
+        conditionals = for key, val of specials
+          do (key, val) =>
+            if rowAttr = @rowAttributeMap()[key.toLowerCase()] # If the current key (lowercased) is in the attr map
+              primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
+            else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
+              false
+        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else _defaultMatch(filter, row, @rowAttributeMap())) else true)
+
+  initWithServerSidePagination: ->
+    _getDataFromServer = (data, cb) =>
+      url = "#{@options.paginationPath}?#{("#{key}=#{val}" for key, val of data).join('&')}"
+
+      req = new XMLHttpRequest()
+      req.open 'GET', url, true
+      req.setRequestHeader 'Content-Type', 'application/json'
+
+      req.onload = =>
+        if req.status >= 200 and req.status < 400
+          cb null, JSON.parse(req.responseText)
+        else
+          cb new Error("Error communicating with server")
+
+      req.onerror = => cb new Error "Error communicating with server"
+
+      req.send()
+
+    @filtering = ko.observable false
+    @pagedRows = ko.observableArray []
+    @numFilteredRows = ko.observable 0
+
+    @filter.subscribe => @currentPage 1
+    @perPage.subscribe => @currentPage 1
+
+    ko.computed =>
+      @filtering true
+
+      data =
+        perPage: @perPage()
+        page: @currentPage()
+
+      if (filter = @filter()) and filter isnt ''
+        data.filter  = filter
+
+      if (sortDir = @sortDir()) and sortDir isnt ''
+        data.sortDir = sortDir
+
+      if (sortBy = @sortField()) and sortBy isnt ''
+        data.sortBy  = sortBy
+
+      _getDataFromServer data, (err, response) =>
+        @loading false
+        @filtering false
+        if err then return console.log err
+
+        {total, results} = response
+        @numFilteredRows total
+        @pagedRows results.map(@options.resultHandlerFn)
+
+    .extend {rateLimit: 500, method: 'notifyWhenChangesStop'}
+
+    @pages = pureComputed => Math.ceil @numFilteredRows() / @perPage()
+
+    @leftPagerClass = pureComputed => 'disabled' if @currentPage() is 1
+    @rightPagerClass = pureComputed => 'disabled' if @currentPage() is @pages()
+
+    # info
+    @from = pureComputed => (@currentPage() - 1) * @perPage() + 1
+    @to = pureComputed =>
+      to = @currentPage() * @perPage()
+      if to > (total = @numFilteredRows())
+        total
+      else
+        to
+
+    @recordsText = pureComputed =>
+      pages = @pages()
+      total = @numFilteredRows()
+      from = @from()
+      to = @to()
+      recordWord = @options.recordWord
+      recordWordPlural = @options.recordWordPlural or recordWord + 's'
+      if pages > 1
+        "#{from} to #{to} of #{total} #{recordWordPlural}"
+      else
+        "#{total} #{if total > 1 or total is 0 then recordWordPlural else recordWord}"
+
+    # state info
+    @showNoData  = pureComputed => @pagedRows().length is 0 and not @loading()
+    @showLoading = pureComputed => @loading()
+
+    # sort arrows
+    @sortClass = (column) =>
+      pureComputed =>
+        if @sortField() is column
+          'sorted ' +
+          if @sortDir() is 'asc'
+            @options.ascSortClass
+          else
+            @options.descSortClass
+        else
+          @options.unsortedClass
+
   toggleSort: (field) -> =>
     @currentPage 1
     if @sortField() is field
@@ -146,49 +304,3 @@ class @DataTable
   gotoPage: (page) -> => @currentPage page
 
   pageClass: (page) -> pureComputed => 'active' if @currentPage() is page
-
-  addRecord: (record) -> @rows.push record
-
-  removeRecord: (record) ->
-    @rows.remove record
-    if @pagedRows().length is 0
-      @prevPage()
-
-  replaceRows: (rows) ->
-    @rows rows
-    @currentPage 1
-    @filter undefined
-
-  defaultMatch: (filter, row, attrMap) ->
-    (val for key, val of attrMap).some (val) ->
-      primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
-
-  filterFn: (filterVar) ->
-    # If the user has defined a filterFn in the table options, use it
-    # (for backwards compatibility with older datatable)
-    if @options.filterFn?
-      return @options.filterFn(filterVar)
-    else
-      # Split up filterVar into :-based conditionals and a filter
-      [filter, specials] = [[],{}]
-      filterVar.split(' ').forEach (word) ->
-        if word.indexOf(':') >= 0
-          words = word.split(':')
-          specials[words[0]] = switch words[1].toLowerCase()
-            when 'yes', 'true' then true
-            when 'no', 'false' then false
-            when 'blank', 'none', 'null', 'undefined' then undefined
-            else words[1].toLowerCase()
-        else
-          filter.push word
-      filter = filter.join(' ')
-      defaultMatch = @defaultMatch
-      return (row) =>
-        conditionals = for key, val of specials
-          do (key, val) =>
-            if rowAttr = @rowAttributeMap()[key.toLowerCase()] # If the current key (lowercased) is in the attr map
-              primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
-            else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
-              false
-        # console.log conditionals
-        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else defaultMatch(filter, row, @rowAttributeMap())) else true)
