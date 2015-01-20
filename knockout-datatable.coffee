@@ -15,12 +15,12 @@ class @DataTable
 
   constructor: (rows, options) ->
 
-    if 'object' is typeof rows
-      options = rows
-      rows = []
-    else if 'undefined' is typeof rows
-      options = {}
-      rows = []
+    if not options
+      unless rows instanceof Array
+        options = rows
+        rows = []
+      else
+        options = {}
 
     # set some default options if none were passed in
     @options =
@@ -101,6 +101,8 @@ class @DataTable
       @filtering false
 
       rows
+
+    .extend {rateLimit: 50, method: 'notifyWhenChangesStop'}
 
     @pagedRows = pureComputed =>
       pageIndex = @currentPage() - 1
@@ -207,6 +209,20 @@ class @DataTable
 
       req.send()
 
+    _gatherData = (perPage, currentPage, filter, sortDir, sortField) ->
+      data =
+        perPage: perPage
+        page:    currentPage
+
+      if filter? and filter isnt ''
+        data.filter  = filter
+
+      if sortDir? and sortDir isnt '' and sortField? and sortField isnt ''
+        data.sortDir = sortDir
+        data.sortBy  = sortField
+
+      return data
+
     @filtering = ko.observable false
     @pagedRows = ko.observableArray []
     @numFilteredRows = ko.observable 0
@@ -217,18 +233,7 @@ class @DataTable
     ko.computed =>
       @filtering true
 
-      data =
-        perPage: @perPage()
-        page: @currentPage()
-
-      if (filter = @filter()) and filter isnt ''
-        data.filter  = filter
-
-      if (sortDir = @sortDir()) and sortDir isnt ''
-        data.sortDir = sortDir
-
-      if (sortBy = @sortField()) and sortBy isnt ''
-        data.sortBy  = sortBy
+      data = _gatherData @perPage(), @currentPage(), @filter(), @sortDir(), @sortField()
 
       _getDataFromServer data, (err, response) =>
         @loading false
@@ -282,6 +287,29 @@ class @DataTable
             @options.descSortClass
         else
           @options.unsortedClass
+
+    @addRecord = ->
+      throw new Error("#addRecord() not applicable with serverSidePagination enabled")
+
+    @removeRecord = ->
+      throw new Error("#removeRecord() not applicable with serverSidePagination enabled")
+
+    @replaceRows = ->
+      throw new Error("#replaceRows() not applicable with serverSidePagination enabled")
+
+    @refreshData = =>
+      @filtering true
+
+      data = _gatherData @perPage(), @currentPage(), @filter(), @sortDir(), @sortField()
+
+      _getDataFromServer data, (err, response) =>
+        @loading false
+        @filtering false
+        if err then return console.log err
+
+        {total, results} = response
+        @numFilteredRows total
+        @pagedRows results.map(@options.resultHandlerFn)
 
   toggleSort: (field) -> =>
     @currentPage 1

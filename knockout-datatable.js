@@ -22,12 +22,13 @@
 
     function DataTable(rows, options) {
       var serverSideOpts;
-      if ('object' === typeof rows) {
-        options = rows;
-        rows = [];
-      } else if ('undefined' === typeof rows) {
-        options = {};
-        rows = [];
+      if (!options) {
+        if (!(rows instanceof Array)) {
+          options = rows;
+          rows = [];
+        } else {
+          options = {};
+        }
       }
       this.options = {
         recordWord: options.recordWord || 'record',
@@ -142,7 +143,10 @@
           _this.filtering(false);
           return rows;
         };
-      })(this));
+      })(this)).extend({
+        rateLimit: 50,
+        method: 'notifyWhenChangesStop'
+      });
       this.pagedRows = pureComputed((function(_this) {
         return function() {
           var pageIndex, perPage;
@@ -319,7 +323,7 @@
     };
 
     DataTable.prototype.initWithServerSidePagination = function() {
-      var _getDataFromServer;
+      var _gatherData, _getDataFromServer;
       _getDataFromServer = (function(_this) {
         return function(data, cb) {
           var key, req, url, val;
@@ -348,6 +352,21 @@
           return req.send();
         };
       })(this);
+      _gatherData = function(perPage, currentPage, filter, sortDir, sortField) {
+        var data;
+        data = {
+          perPage: perPage,
+          page: currentPage
+        };
+        if ((filter != null) && filter !== '') {
+          data.filter = filter;
+        }
+        if ((sortDir != null) && sortDir !== '' && (sortField != null) && sortField !== '') {
+          data.sortDir = sortDir;
+          data.sortBy = sortField;
+        }
+        return data;
+      };
       this.filtering = ko.observable(false);
       this.pagedRows = ko.observableArray([]);
       this.numFilteredRows = ko.observable(0);
@@ -363,21 +382,9 @@
       })(this));
       ko.computed((function(_this) {
         return function() {
-          var data, filter, sortBy, sortDir;
+          var data;
           _this.filtering(true);
-          data = {
-            perPage: _this.perPage(),
-            page: _this.currentPage()
-          };
-          if ((filter = _this.filter()) && filter !== '') {
-            data.filter = filter;
-          }
-          if ((sortDir = _this.sortDir()) && sortDir !== '') {
-            data.sortDir = sortDir;
-          }
-          if ((sortBy = _this.sortField()) && sortBy !== '') {
-            data.sortBy = sortBy;
-          }
+          data = _gatherData(_this.perPage(), _this.currentPage(), _this.filter(), _this.sortDir(), _this.sortField());
           return _getDataFromServer(data, function(err, response) {
             var results, total;
             _this.loading(false);
@@ -455,7 +462,7 @@
           return _this.loading();
         };
       })(this));
-      return this.sortClass = (function(_this) {
+      this.sortClass = (function(_this) {
         return function(column) {
           return pureComputed(function() {
             if (_this.sortField() === column) {
@@ -463,6 +470,33 @@
             } else {
               return _this.options.unsortedClass;
             }
+          });
+        };
+      })(this);
+      this.addRecord = function() {
+        throw new Error("#addRecord() not applicable with serverSidePagination enabled");
+      };
+      this.removeRecord = function() {
+        throw new Error("#removeRecord() not applicable with serverSidePagination enabled");
+      };
+      this.replaceRows = function() {
+        throw new Error("#replaceRows() not applicable with serverSidePagination enabled");
+      };
+      return this.refreshData = (function(_this) {
+        return function() {
+          var data;
+          _this.filtering(true);
+          data = _gatherData(_this.perPage(), _this.currentPage(), _this.filter(), _this.sortDir(), _this.sortField());
+          return _getDataFromServer(data, function(err, response) {
+            var results, total;
+            _this.loading(false);
+            _this.filtering(false);
+            if (err) {
+              return console.log(err);
+            }
+            total = response.total, results = response.results;
+            _this.numFilteredRows(total);
+            return _this.pagedRows(results.map(_this.options.resultHandlerFn));
           });
         };
       })(this);
