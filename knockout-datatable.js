@@ -383,6 +383,7 @@
       ko.computed((function(_this) {
         return function() {
           var data;
+          _this.loading(true);
           _this.filtering(true);
           data = _gatherData(_this.perPage(), _this.currentPage(), _this.filter(), _this.sortDir(), _this.sortField());
           return _getDataFromServer(data, function(err, response) {
@@ -485,6 +486,7 @@
       return this.refreshData = (function(_this) {
         return function() {
           var data;
+          _this.loading(true);
           _this.filtering(true);
           data = _gatherData(_this.perPage(), _this.currentPage(), _this.filter(), _this.sortDir(), _this.sortField());
           return _getDataFromServer(data, function(err, response) {

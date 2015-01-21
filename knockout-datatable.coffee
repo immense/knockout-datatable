@@ -231,6 +231,7 @@ class @DataTable
     @perPage.subscribe => @currentPage 1
 
     ko.computed =>
+      @loading true
       @filtering true
 
       data = _gatherData @perPage(), @currentPage(), @filter(), @sortDir(), @sortField()
@@ -298,6 +299,7 @@ class @DataTable
       throw new Error("#replaceRows() not applicable with serverSidePagination enabled")
 
     @refreshData = =>
+      @loading true
       @filtering true
 
       data = _gatherData @perPage(), @currentPage(), @filter(), @sortDir(), @sortField()
