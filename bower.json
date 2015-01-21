@@ -10,5 +10,9 @@
     "README.md",
     "example",
     "node_modules"
-  ]
+  ],
+  "devDependencies": {},
+  "dependencies": {
+    "knockout": "~3.2.0"
+  }
 }
