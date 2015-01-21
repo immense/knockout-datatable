@@ -1,14 +1,25 @@
 {
   "name": "knockout-datatable",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": false,
   "scripts": {
     "compile": "grunt"
   },
   "devDependencies": {
+    "chai": "~1.10.0",
     "grunt": "*",
-    "grunt-contrib-uglify": "*",
     "grunt-contrib-coffee": "*",
-    "grunt-contrib-less": "*"
+    "grunt-contrib-less": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-karma": "~0.10.1",
+    "karma": "~0.12.31",
+    "karma-chai-sinon": "^0.1.4",
+    "karma-chrome-launcher": "~0.1.7",
+    "karma-firefox-launcher": "~0.1.4",
+    "karma-mocha": "~0.1.10",
+    "karma-mocha-reporter": "^0.3.1",
+    "mocha": "~2.1.0",
+    "sinon": "^1.12.2",
+    "sinon-chai": "^2.6.0"
   }
 }
