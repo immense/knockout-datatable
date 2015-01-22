@@ -6,6 +6,7 @@ module.exports = (grunt) ->
         frameworks: ['mocha', 'chai-sinon']
         browsers: [
           'Chrome'
+          'PhantomJS'
           'Firefox'
         ]
         plugins: [
@@ -14,6 +15,7 @@ module.exports = (grunt) ->
           'karma-chai-sinon' # Use chai/sinon for testing helpers
           'karma-firefox-launcher'
           'karma-chrome-launcher'
+          'karma-phantomjs-launcher'
         ]
         files: [
           # Require DataTable & it's dependencies

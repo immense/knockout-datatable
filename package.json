@@ -13,13 +13,14 @@
     "grunt-contrib-uglify": "*",
     "grunt-karma": "~0.10.1",
     "karma": "~0.12.31",
-    "karma-chai-sinon": "^0.1.4",
+    "karma-chai-sinon": "~0.1.4",
     "karma-chrome-launcher": "~0.1.7",
     "karma-firefox-launcher": "~0.1.4",
     "karma-mocha": "~0.1.10",
-    "karma-mocha-reporter": "^0.3.1",
+    "karma-mocha-reporter": "~0.3.1",
+    "karma-phantomjs-launcher": "~0.1.4",
     "mocha": "~2.1.0",
-    "sinon": "^1.12.2",
-    "sinon-chai": "^2.6.0"
+    "sinon": "~1.12.2",
+    "sinon-chai": "~2.6.0"
   }
 }

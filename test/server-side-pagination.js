@@ -2,23 +2,41 @@ describe('DataTable', function(){
   var view;
 
   describe('server-side pagination', function(){
-    var server, examplePaginationResponseFromServer = function(perPage, page, opts){
+    var server;
+
+    var _examplePaginationResponseFromServer = function(perPage, page, opts){
       if (!opts) opts = {};
+      var total = opts.total || 100;
       if (!(perPage && page)) {
         throw new Error("perPage and page required to construct example response");
         return;
       }
+      var results = [];
+      for (var i = ((page - 1) * perPage + 1); i <= Math.min(total, page * perPage); i++){
+        results.push({
+          id: i,
+          name: 'res' + i
+        });
+      }
       return JSON.stringify({
-        total: (opts.total || 100),
-        results: [0,1,2,3,4,5,6,7,8,9,10,11,12].map(function(i){
-          var id = ((page - 1) * perPage) + i;
-          return {
-            id: id,
-            name: 'res' + id
-          }
-        })
+        total: total,
+        results: results
       });
     };
+
+    // Waits 501ms (since datatable sends request 500ms after
+    // changes have stopped) and triggers a response from the mock server
+    var _waitAndServerRespond = function(perPage, page, opts, cb){
+      setTimeout(function(){
+        req = server.requests[0]
+        req.respond(200, {
+          "Content-Type": "application/json"
+        }, _examplePaginationResponseFromServer(13, 1, opts));
+        server.restore();
+        server = sinon.fakeServer.create();
+        cb(req);
+      }, 501);
+    }
 
     beforeEach(function(){
       server = sinon.fakeServer.create();
@@ -69,16 +87,16 @@ describe('DataTable', function(){
             }
           });
         });
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=1');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 1));
+        _waitAndServerRespond(13, 1, {}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.notInclude(decodedURI, 'sortBy=');
+          assert.notInclude(decodedURI, 'sortDir=');
+          assert.notInclude(decodedURI, 'filter=');
           done();
-        }, 501);
+        });
       });
     });
     describe('#pagedRows()', function(){
@@ -90,7 +108,7 @@ describe('DataTable', function(){
 
         it('should map results using `loader` function', function(){
           var rows = view.pagedRows();
-          assert.equal(rows[0].name, 'res0');
+          assert.equal(rows[0].name, 'res1');
           assert.equal(rows[0].type, 'foobar');
         });
       });
@@ -98,144 +116,167 @@ describe('DataTable', function(){
     describe('#nextPage()', function(){
       it('should submit request for next page', function(done){
         view.nextPage();
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=2');
-          assert.notInclude(server.requests[0].url, 'sortBy=');
-          assert.notInclude(server.requests[0].url, 'sortDir=');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 2));
+        _waitAndServerRespond(13, 2, {}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=2');
+          assert.notInclude(decodedURI, 'sortBy=');
+          assert.notInclude(decodedURI, 'sortDir=');
+          assert.notInclude(decodedURI, 'filter=');
           done();
-        }, 501);
+        });
       });
     });
     describe('#prevPage()', function(){
       it('should submit request for previous page', function(done){
         view.prevPage();
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=1');
-          assert.notInclude(server.requests[0].url, 'sortBy=');
-          assert.notInclude(server.requests[0].url, 'sortDir=');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 1));
-          done();
-        }, 501);
+        _waitAndServerRespond(13, 1, {}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.notInclude(decodedURI, 'sortBy=');
+          assert.notInclude(decodedURI, 'sortDir=');
+          assert.notInclude(decodedURI, 'filter=');
+          done()
+        });
       });
     });
     describe('#toggleSort(fieldName)()', function(){
       it('should submit request for current page, sorted desc', function(done){
         view.toggleSort('name')();
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=1');
-          assert.include(server.requests[0].url, 'sortBy=name');
-          assert.include(server.requests[0].url, 'sortDir=asc');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 1));
+        _waitAndServerRespond(13, 1, {}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.include(decodedURI, 'sortBy=name');
+          assert.include(decodedURI, 'sortDir=asc');
+          assert.notInclude(decodedURI, 'filter=');
           done();
-        }, 501);
+        });
       });
 
       it('should submit request for current page, sorted asc', function(done){
         view.toggleSort('name')();
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=1');
-          assert.include(server.requests[0].url, 'sortBy=name');
-          assert.include(server.requests[0].url, 'sortDir=desc');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 1));
+        _waitAndServerRespond(13, 1, {}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.include(decodedURI, 'sortBy=name');
+          assert.include(decodedURI, 'sortDir=desc');
+          assert.notInclude(decodedURI, 'filter=');
           done();
-        }, 501);
+        });
       });
     });
 
-    describe('#pages()', function(){
-      it('should be correct number of pages determined by response from server', function(){
-        // from mock server: {total: 100, results: [...]}
-        // with perPage of 13 and total of 100, should get (100 / 13).ceil
-        assert.equal(view.pages(), Math.ceil(100 / 13));
-      });
-
-      it('should change when a request returns that server has a different total', function(done){
-        view.nextPage();
-        setTimeout(function(){
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 2, {total: 120}));
-          assert.equal(view.pages(), Math.ceil(120 / 13));
+    describe('#filter(filterText)', function(){
+      it('should submit request for current page, with filter', function(done){
+        view.filter('foo bar baz');
+        _waitAndServerRespond(13, 1, {total: 5}, function(request){
+          var decodedURI = window.decodeURI(request.url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.include(decodedURI, 'sortBy=name');
+          assert.include(decodedURI, 'sortDir=desc');
+          assert.include(decodedURI, 'filter=foo bar baz');
           done();
-        }, 501);
+        });
       });
     });
 
     describe('#gotoPage(pageNum)()', function(){
       it('should submit request with page = pageNum', function(done){
-        view.gotoPage(3)();
-        setTimeout(function(){
-          assert.equal(server.requests.length, 1);
-          assert.include(server.requests[0].url, '/api/communities?');
-          assert.include(server.requests[0].url, 'perPage=13');
-          assert.include(server.requests[0].url, 'page=3');
-          assert.include(server.requests[0].url, 'sortBy=name');
-          assert.include(server.requests[0].url, 'sortDir=desc');
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 3));
-          done();
-        }, 501);
+        view.filter('');
+        view.toggleSort('')();
+        _waitAndServerRespond(13, 1, {}, function(request){
+          view.gotoPage(3)();
+          _waitAndServerRespond(13, 3, {}, function(request){
+            var decodedURI = window.decodeURI(request.url);
+            assert.include(decodedURI, '/api/communities?');
+            assert.include(decodedURI, 'perPage=13');
+            assert.include(decodedURI, 'page=3');
+            done();
+          });
+        });
       });
 
       it('should do something specific when pageNum is out of range?');
     });
 
+    describe('#pages()', function(){
+      it('should be correct number of pages determined by response from server', function(done){
+        view.filter('');
+        view.toggleSort('')();
+        view.gotoPage(1)();
+        _waitAndServerRespond(13, 1, {}, function(request){
+          // from mock server: {total: 100, results: [...]}
+          // with perPage of 13 and total of 100, should get (100 / 13).ceil
+          assert.equal(view.pages(), Math.ceil(100 / 13));
+          done()
+        });
+      });
+
+      it('should change when a request returns that server has a different total', function(done){
+        view.nextPage();
+        _waitAndServerRespond(13, 2, {total: 120}, function(request){
+          assert.equal(view.pages(), Math.ceil(120 / 13));
+          done();
+        });
+      });
+    });
+
     describe('#pageClass(pageNum)()', function(){
 
-      it("should be undefined for pages that aren't the current page", function(){
-        assert.equal(view.pageClass(1)(), undefined);
-        assert.equal(view.pageClass(2)(), undefined);
-        assert.equal(view.pageClass(20)(), undefined);
+      it("should be undefined for pages that aren't the current page", function(done){
+        view.gotoPage(1)();
+        _waitAndServerRespond(13, 1, {}, function(request){
+          assert.equal(view.pageClass(2)(), undefined);
+          assert.equal(view.pageClass(3)(), undefined);
+          assert.equal(view.pageClass(20)(), undefined);
+          done()
+        });
       });
 
       it("should be active for current page", function(done){
-        assert.equal(view.pageClass(3)(), 'active');
+        assert.equal(view.pageClass(1)(), 'active');
         view.gotoPage(2)();
-        setTimeout(function(){
+        _waitAndServerRespond(13, 2, {}, function(request){
           assert.equal(view.pageClass(2)(), 'active');
-          assert.equal(view.pageClass(3)(), undefined);
-          server.requests[0].respond(200, {
-            "Content-Type": "application/json"
-          }, examplePaginationResponseFromServer(13, 2));
+          assert.equal(view.pageClass(1)(), undefined);
           done();
-        }, 501);
+        });
       });
     });
 
     describe('#refreshData()', function(){
-      it('should submit request with current state of view model', function(){
-        view.refreshData();
-        assert.equal(server.requests.length, 1);
-        assert.include(server.requests[0].url, '/api/communities?');
-        assert.include(server.requests[0].url, 'perPage=13');
-        assert.include(server.requests[0].url, 'page=2');
-        assert.include(server.requests[0].url, 'sortBy=name');
-        assert.include(server.requests[0].url, 'sortDir=desc');
-        server.requests[0].respond(200, {
-          "Content-Type": "application/json"
-        }, examplePaginationResponseFromServer(13, 2));
+      it('should submit request with current state of view model', function(done){
+        view.perPage(13);
+        view.gotoPage(1)();
+        view.filter('');
+        view.toggleSort('')();
+        _waitAndServerRespond(13, 1, {}, function(request){
+          assert.equal(server.requests.length, 0);
+          view.refreshData();
+          assert.equal(server.requests.length, 1);
+
+          var decodedURI = window.decodeURI(server.requests[0].url);
+          assert.include(decodedURI, '/api/communities?');
+          assert.include(decodedURI, 'perPage=13');
+          assert.include(decodedURI, 'page=1');
+          assert.notInclude(decodedURI, 'sortBy=');
+          assert.notInclude(decodedURI, 'sortDir=');
+          assert.notInclude(decodedURI, 'filter=');
+
+          server.requests[0].respond(200, {
+            "Content-Type": "application/json"
+          }, _examplePaginationResponseFromServer(13, 1));
+          done();
+        });
       });
     });
 
