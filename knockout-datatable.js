@@ -332,7 +332,7 @@
             _results = [];
             for (key in data) {
               val = data[key];
-              _results.push("" + key + "=" + val);
+              _results.push("" + (encodeURIComponent(key)) + "=" + (encodeURIComponent(val)));
             }
             return _results;
           })()).join('&'));

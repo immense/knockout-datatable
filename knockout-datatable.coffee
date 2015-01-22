@@ -193,7 +193,7 @@ class @DataTable
 
   initWithServerSidePagination: ->
     _getDataFromServer = (data, cb) =>
-      url = "#{@options.paginationPath}?#{("#{key}=#{val}" for key, val of data).join('&')}"
+      url = "#{@options.paginationPath}?#{("#{encodeURIComponent(key)}=#{encodeURIComponent(val)}" for key, val of data).join('&')}"
 
       req = new XMLHttpRequest()
       req.open 'GET', url, true
