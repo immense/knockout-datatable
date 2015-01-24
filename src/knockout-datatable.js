@@ -1,5 +1,4 @@
 (function() {
-  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   this.DataTable = (function() {
     var primitiveCompare, pureComputed;
@@ -65,18 +64,14 @@
     };
 
     DataTable.prototype.initWithClientSidePagination = function(rows) {
-      var _defaultMatch;
+      var _defaultMatch, self = this;
       this.filtering = ko.observable(false);
-      this.filter.subscribe((function(_this) {
-        return function() {
-          return _this.currentPage(1);
-        };
-      })(this));
-      this.perPage.subscribe((function(_this) {
-        return function() {
-          return _this.currentPage(1);
-        };
-      })(this));
+      this.filter.subscribe(function() {
+        self.currentPage(1);
+      });
+      this.perPage.subscribe(function() {
+        self.currentPage(1);
+      });
       this.rows(rows);
       this.rowAttributeMap = pureComputed((function(_this) {
         return function() {
@@ -304,7 +299,19 @@
                 conditionals.push(false);
               }
             }
-            return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? ('function' === typeof row.match ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+            if (conditionals.indexOf(false) === -1) {
+              if (filter !== '') {
+                if ('function' === typeof row.match) {
+                  return row.match(filter);
+                } else {
+                  return _defaultMatch(filter, row, _this.rowAttributeMap());
+                }
+              } else {
+                return true;
+              }
+            } else {
+              return false;
+            }
           };
         };
       })(this);
