@@ -6,10 +6,13 @@
   "ignore": [
     ".gitignore",
     "demo.html",
-    "Gruntfile.coffee",
+    "gulpfile.js",
+    "karma.conf.js",
     "README.md",
     "example",
-    "node_modules"
+    "node_modules",
+    "src",
+    "test"
   ],
   "devDependencies": {},
   "dependencies": {

@@ -7,10 +7,10 @@
     pureComputed = ko.pureComputed || ko.computed;
 
     primitiveCompare = function(item1, item2) {
-      if (item2 == null) {
-        return item1 == null;
-      } else if (item1 != null) {
-        if (typeof item1 === 'boolean') {
+      if (item2 === null || item2 === undefined) {
+        return item1 === null || item1 === undefined;
+      } else if (item1 !== null && item1 !== undefined) {
+        if ('boolean' === typeof item1) {
           return item1 === item2;
         } else {
           return item1.toString().toLowerCase().indexOf(item2.toString().toLowerCase()) >= 0 || item1 === item2;
@@ -61,7 +61,7 @@
       this.currentPage = ko.observable(1);
       this.filter = ko.observable('');
       this.loading = ko.observable(false);
-      return this.rows = ko.observableArray([]);
+      this.rows = ko.observableArray([]);
     };
 
     DataTable.prototype.initWithClientSidePagination = function(rows) {
@@ -96,7 +96,7 @@
       })(this));
       this.filteredRows = pureComputed((function(_this) {
         return function() {
-          var filter, filterFn;
+          var filter, filterFn, sortField;
           _this.filtering(true);
           filter = _this.filter();
           rows = _this.rows.slice(0);
@@ -104,32 +104,32 @@
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
-          if ((_this.sortField() != null) && _this.sortField() !== '') {
+          if ((sortField = _this.sortField()) || sortField === 0) {
             rows.sort(function(a, b) {
               var aVal, bVal;
-              aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
-              bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
-              if (typeof aVal === 'string') {
+              aVal = ko.utils.unwrapObservable(a[sortField]);
+              bVal = ko.utils.unwrapObservable(b[sortField]);
+              if ('string' === typeof aVal) {
                 aVal = aVal.toLowerCase();
               }
-              if (typeof bVal === 'string') {
+              if ('string' == typeof bVal) {
                 bVal = bVal.toLowerCase();
               }
               if (_this.sortDir() === 'asc') {
-                if (aVal < bVal || aVal === '' || (aVal == null)) {
+                if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
                   return -1;
                 } else {
-                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                  if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
                     return 1;
                   } else {
                     return 0;
                   }
                 }
               } else {
-                if (aVal < bVal || aVal === '' || (aVal == null)) {
+                if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
                   return 1;
                 } else {
-                  if (aVal > bVal || bVal === '' || (bVal == null)) {
+                  if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
                     return -1;
                   } else {
                     return 0;
@@ -137,8 +137,6 @@
                 }
               }
             });
-          } else {
-            rows;
           }
           _this.filtering(false);
           return rows;
@@ -266,15 +264,14 @@
           return primitiveCompare((ko.isObservable(row[val]) ? row[val]() : row[val]), filter);
         });
       };
-      return this.filterFn = this.options.filterFn || (function(_this) {
+      this.filterFn = this.options.filterFn || (function(_this) {
         return function(filterVar) {
-          var filter, specials, _ref;
-          _ref = [[], {}], filter = _ref[0], specials = _ref[1];
+          var filter = [], specials = {};
           filterVar.split(' ').forEach(function(word) {
             var words;
             if (word.indexOf(':') >= 0) {
               words = word.split(':');
-              return specials[words[0]] = (function() {
+              specials[words[0]] = (function() {
                 switch (words[1].toLowerCase()) {
                   case 'yes':
                   case 'true':
@@ -292,31 +289,22 @@
                 }
               })();
             } else {
-              return filter.push(word);
+              filter.push(word);
             }
           });
           filter = filter.join(' ');
           return function(row) {
-            var conditionals, key, val;
-            conditionals = (function() {
-              var _results;
-              _results = [];
-              for (key in specials) {
-                val = specials[key];
-                _results.push((function(_this) {
-                  return function(key, val) {
-                    var rowAttr;
-                    if (rowAttr = _this.rowAttributeMap()[key.toLowerCase()]) {
-                      return primitiveCompare((ko.isObservable(row[rowAttr]) ? row[rowAttr]() : row[rowAttr]), val);
-                    } else {
-                      return false;
-                    }
-                  };
-                })(this)(key, val));
+            var conditionals = [], key, val;
+            for (key in specials) {
+              val = specials[key];
+              var rowAttr = _this.rowAttributeMap()[key.toLowerCase()];
+              if (rowAttr) {
+                conditionals.push(primitiveCompare((ko.isObservable(row[rowAttr]) ? row[rowAttr]() : row[rowAttr]), val));
+              } else {
+                conditionals.push(false);
               }
-              return _results;
-            }).call(_this);
-            return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+            }
+            return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? ('function' === typeof row.match ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
           };
         };
       })(this);
@@ -358,10 +346,10 @@
           perPage: perPage,
           page: currentPage
         };
-        if ((filter != null) && filter !== '') {
+        if (filter || filter === 0) {
           data.filter = filter;
         }
-        if ((sortDir != null) && sortDir !== '' && (sortField != null) && sortField !== '') {
+        if ((sortDir || sortDir === 0) && (sortField || sortField === 0)) {
           data.sortDir = sortDir;
           data.sortBy = sortField;
         }
@@ -393,7 +381,8 @@
             if (err) {
               return console.log(err);
             }
-            total = response.total, results = response.results;
+            total = response.total;
+            results = response.results;
             _this.numFilteredRows(total);
             return _this.pagedRows(results.map(_this.options.resultHandlerFn));
           });
@@ -483,7 +472,7 @@
       this.replaceRows = function() {
         throw new Error("#replaceRows() not applicable with serverSidePagination enabled");
       };
-      return this.refreshData = (function(_this) {
+      this.refreshData = (function(_this) {
         return function() {
           var data;
           _this.loading(true);
@@ -496,7 +485,8 @@
             if (err) {
               return console.log(err);
             }
-            total = response.total, results = response.results;
+            total = response.total;
+            results = response.results;
             _this.numFilteredRows(total);
             return _this.pagedRows(results.map(_this.options.resultHandlerFn));
           });

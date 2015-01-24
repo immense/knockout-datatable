@@ -5,9 +5,9 @@
     <meta content="utf-8" http-equiv="encoding">
     <title>Knockout DataTable Demo</title>
     <link rel='stylesheet' type='text/css' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
-    <link rel='stylesheet' type='text/css' href='knockout-datatable.css'>
+    <link rel='stylesheet' type='text/css' href='example/knockout-datatable.css'>
     <script src='http://knockoutjs.com/downloads/knockout-3.2.0.js'></script>
-    <script src='knockout-datatable.min.js'></script>
+    <script src='dist/knockout-datatable.js'></script>
     <style type='text/css'>
       /* yanked from bootstrap demos: http://getbootstrap.com/examples/jumbotron-narrow/ */
 
@@ -208,7 +208,7 @@ class @CitiesModel
       ascSortClass:     'glyphicon glyphicon-sort-by-attributes'
       descSortClass:    'glyphicon glyphicon-sort-by-attributes-alt'
 
-    @table = new DataTable [], tableOptions
+    @table = new DataTable tableOptions
     @table.loading true
 
     req = new XMLHttpRequest()

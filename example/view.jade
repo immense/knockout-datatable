@@ -37,5 +37,6 @@ div.cloak(data-bind='with: exampleTable')
         a(href='#', data-bind='text: $index + 1, click: gotoPage($index + 1)')
       li(data-bind='css: rightPagerClass, click: nextPage'): a(href='#') &raquo;
 
-:coffeescript
-  $ -> window.view = new ExampleModel
+block script
+  :coffeescript
+    $ -> window.view = new ExampleModel

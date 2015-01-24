@@ -22,7 +22,7 @@ class @ExampleModel
       sortField: 'foo'
       perPage: 15
 
-    @exampleTable = new DataTable [], tableOptions
+    @exampleTable = new DataTable tableOptions
     @exampleTable.loading true
 
     req = new XMLHttpRequest()
