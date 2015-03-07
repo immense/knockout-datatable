@@ -16,6 +16,7 @@
   ],
   "devDependencies": {},
   "dependencies": {
-    "knockout": "~3.2.0"
+    "knockout": "~3.3.0",
+    "fetch": "~0.7.0"
   }
 }

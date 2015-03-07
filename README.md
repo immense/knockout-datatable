@@ -10,38 +10,37 @@ Check out the [demo](http://rawgit.com/immense/knockout-datatable/master/demo.ht
 
 To install it in your bower-enabled project, run `bower install knockout-datatable`.
 
-Or drop the `knockout-datatable{.min}.js` file in your vendor assets javascript folder and require it in your application.
+Or drop the `dist/knockout-datatable.js` file in your vendor assets javascript folder and require it in your application.
 
 ## Usage
 
 Refer to the [demo](http://rawgit.com/immense/knockout-datatable/master/demo.html) for detailed usage instructions.
 
-### API
+## API
 
-The following methods are available on the DataTable instance:
-* `prevPage()` - go to the previous page (if not on page 1)
-* `nextPage()` - go to next page (if not on last page)
-* `toggleSort(field)`
-  - switches to ascending sort if sorted descending by `field`
-  - switches to descending sort if sorted ascending by `field`
-  - sorts ascending by `field` if not already sorted by `field`
-* `gotoPage(pageNum)` - sets the current page to `pageNum`
-* `pageClass(pageNum)` - returns `"active"` if `pageNum` is the current page
-* `addRecord(new_record)` - pushes `new_record` onto the datatable's rows
-* `removeRecord(record)` - removes `record` from the datatable's rows
-* `replaceRows(new_rows_array)`
-  - resets the datatable's rows to `new_rows_array`
-  - sets the current page to `1`
+See [API Documentation](API.md).
 
 
 ## Building
 
-To build the Knockout DataTable coffeescript source, do the following in a node.js enabled environment:
+To build the Knockout DataTable minified source, do the following in a node.js enabled environment:
 
-```
-npm install -g grunt-cli
+```bash
+npm install -g gulp
 npm install
-grunt
+gulp
+```
+
+## Running Tests
+
+To just run the suite:
+```bash
+gulp test
+```
+
+To watch the src/ and test/ directories and build/lint/test on changes:
+```bash
+gulp dev
 ```
 
 ## Contributing

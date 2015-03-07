@@ -3,9 +3,12 @@ var gulp         = require('gulp'),
     sourceMaps   = require('gulp-sourcemaps'),
     karma        = require('gulp-karma'),
     jshint       = require('gulp-jshint'),
+    concat       = require('gulp-concat'),
+    babel        = require('gulp-babel'),
     jshintConfig = require('./package').jshintConfig,
     distFiles    = [
       'bower_components/knockout/dist/knockout.js',
+      'bower_components/fetch/fetch.js'
       'dist/knockout-datatable.js'
     ],
     testFiles    = [
@@ -22,9 +25,11 @@ gulp.task('lint', function() {
 
 gulp.task('build', ['lint'], function() {
   return gulp
-  .src('./src/knockout-datatable.js')
+  .src('./src/**/*.js')
   .pipe(sourceMaps.init())
-  .pipe(uglify())
+  .pipe(babel())
+  .pipe(concat('knockout-datatable.js'))
+  // .pipe(uglify())
   .pipe(sourceMaps.write('.'))
   .pipe(gulp.dest('./dist'))
 });
