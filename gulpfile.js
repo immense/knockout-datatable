@@ -8,7 +8,6 @@ var gulp         = require('gulp'),
     jshintConfig = require('./package').jshintConfig,
     distFiles    = [
       'bower_components/knockout/dist/knockout.js',
-      'bower_components/fetch/fetch.js'
       'dist/knockout-datatable.js'
     ],
     testFiles    = [
@@ -27,9 +26,9 @@ gulp.task('build', ['lint'], function() {
   return gulp
   .src('./src/**/*.js')
   .pipe(sourceMaps.init())
-  .pipe(babel())
+  .pipe(babel({experimental: true}))
   .pipe(concat('knockout-datatable.js'))
-  // .pipe(uglify())
+  .pipe(uglify())
   .pipe(sourceMaps.write('.'))
   .pipe(gulp.dest('./dist'))
 });

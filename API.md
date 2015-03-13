@@ -4,9 +4,9 @@ The following methods are available on the DataTable instance:
 * `perPage(numPerPage)`
   * goes to first page
   * changes the number of results returned by `pagedRows()` to `numPerPage`
-* `prevPage()` - go to the previous page (if not on page 1)
-* `nextPage()` - go to next page (if not on last page)
-* `gotoPage(pageNum)()` - go to page `pageNum`
+* `moveToPrevPage()` - go to the previous page (if not on page 1)
+* `moveToNextPage()` - go to next page (if not on last page)
+* `moveToPage(pageNum)()` - go to page `pageNum`
 * `toggleSort(field)()`
   - switches to ascending sort if already sorted descending by `field`
   - switches to descending sort if already sorted ascending by `field`
@@ -26,7 +26,7 @@ The following methods are available on the DataTable instance:
 
 The following methods are available only when using server-side pagination:
 
-* `refreshRows()` - resubmits the request with the current state of the DataTable
+* `refreshData()` - resubmits the request with the current state of the DataTable
   * Useful for getting data which may have changed since the last request was submitted
 
 The following methods are not available (and will throw an error when called) when using server-side pagination:
@@ -38,7 +38,7 @@ The following methods are not available (and will throw an error when called) wh
 When using server-side pagination, some methods will respond differently:
 
 * `perPage(numPerPage)` - resubmits the request with the new perPage and page
-* `prevPage()` - resubmits the request with the new page
-* `nextPage()` - resubmits the request with the new page
-* `gotoPage(pageNum)()` - resubmits the request with the new page
+* `moveToPrevPage()` - resubmits the request with the new page
+* `moveToNextPage()` - resubmits the request with the new page
+* `moveToPage(pageNum)()` - resubmits the request with the new page
 * `toggleSort(field)()` - resubmits the request with the new sortBy

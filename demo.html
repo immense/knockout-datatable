@@ -6,7 +6,7 @@
     <title>Knockout DataTable Demo</title>
     <link rel='stylesheet' type='text/css' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'>
     <link rel='stylesheet' type='text/css' href='example/knockout-datatable.css'>
-    <script src='http://knockoutjs.com/downloads/knockout-3.2.0.js'></script>
+    <script src='http://knockoutjs.com/downloads/knockout-3.3.0.js'></script>
     <script src='dist/knockout-datatable.js'></script>
     <style type='text/css'>
       /* yanked from bootstrap demos: http://getbootstrap.com/examples/jumbotron-narrow/ */
@@ -280,17 +280,17 @@ class @CitiesModel
     &lt;/tbody&gt;
   &lt;/table&gt;
   &lt;span data-bind="text: recordsText" class="label label-info pull-right"&gt;&lt;/span&gt;
-  &lt;div data-bind="visible: pages() &gt; 1"&gt;
+  &lt;div data-bind="visible: numPages() &gt; 1"&gt;
     &lt;ul class="pagination"&gt;
-      &lt;li data-bind="css: leftPagerClass, click: prevPage"&gt;
+      &lt;li data-bind="css: leftPagerClass, click: moveToPrevPage"&gt;
         &lt;a href="#"&gt;&amp;laquo;&lt;/a&gt;
       &lt;/li&gt;
-      &lt;!-- ko foreach: {data: (new Array(pages()))} --&gt;
+      &lt;!-- ko foreach: {data: (new Array(numPages()))} --&gt;
       &lt;li data-bind="css: $parent.pageClass($index() + 1)"&gt;
-        &lt;a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"&gt;&lt;/a&gt;
+        &lt;a href="#" data-bind="text: $index() + 1, click: $parent.moveToPage($index() + 1)"&gt;&lt;/a&gt;
       &lt;/li&gt;
       &lt;!-- /ko --&gt;
-      &lt;li data-bind="css: rightPagerClass, click: nextPage"&gt;
+      &lt;li data-bind="css: rightPagerClass, click: moveToNextPage"&gt;
         &lt;a href="#"&gt;&amp;raquo;&lt;/a&gt;
       &lt;/li&gt;
     &lt;/ul&gt;
@@ -348,17 +348,17 @@ document.addEventListener('DOMContentLoaded', function(){
               </tbody>
             </table>
             <span data-bind="text: recordsText" class="label label-info pull-right"></span>
-            <div data-bind="visible: pages() > 1">
+            <div data-bind="visible: numPages() > 1">
               <ul class="pagination">
-                <li data-bind="css: leftPagerClass, click: prevPage">
+                <li data-bind="css: leftPagerClass, click: moveToPrevPage">
                   <a href="#">&laquo;</a>
                 </li>
-                <!-- ko foreach: {data: (new Array(pages()))} -->
+                <!-- ko foreach: {data: (new Array(numPages()))} -->
                 <li data-bind="css: $parent.pageClass($index() + 1)">
-                  <a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"></a>
+                  <a href="#" data-bind="text: $index() + 1, click: $parent.moveToPage($index() + 1)"></a>
                 </li>
                 <!-- /ko -->
-                <li data-bind="css: rightPagerClass, click: nextPage">
+                <li data-bind="css: rightPagerClass, click: moveToNextPage">
                   <a href="#">&raquo;</a>
                 </li>
               </ul>
@@ -414,17 +414,17 @@ document.addEventListener('DOMContentLoaded', function(){
               </tbody>
             </table>
             <span data-bind="text: recordsText" class="label label-info pull-right"></span>
-            <div data-bind="visible: pages() > 1">
+            <div data-bind="visible: numPages() > 1">
               <ul class="pagination">
-                <li data-bind="css: leftPagerClass, click: prevPage">
+                <li data-bind="css: leftPagerClass, click: moveToPrevPage">
                   <a href="#">&laquo;</a>
                 </li>
-                <!-- ko foreach: {data: (new Array(pages()))} -->
+                <!-- ko foreach: {data: (new Array(numPages()))} -->
                 <li data-bind="css: $parent.pageClass($index() + 1)">
-                  <a href="#" data-bind="text: $index() + 1, click: $parent.gotoPage($index() + 1)"></a>
+                  <a href="#" data-bind="text: $index() + 1, click: $parent.moveToPage($index() + 1)"></a>
                 </li>
                 <!-- /ko -->
-                <li data-bind="css: rightPagerClass, click: nextPage">
+                <li data-bind="css: rightPagerClass, click: moveToNextPage">
                   <a href="#">&raquo;</a>
                 </li>
               </ul>
@@ -441,22 +441,69 @@ document.addEventListener('DOMContentLoaded', function(){
           <p>When instanciating with <code>new DataTable</code> you have can pass in the following options as the second parameter:</p>
           <dl class='dl-horizontal'>
             <dt><code>recordWord</code></dt>
-            <dd>The name of your rows. In the case above, we used <code>city</code>. Default: <code>record</code></dd>
+            <dd>
+              The name of your rows. In the case above, we used <code>city</code>.<br>
+              <strong>Default:</strong> <code>record</code>
+            </dd>
 
             <dt><code>recordWordPlural</code></dt>
-            <dd>The plural name of your rows. Since we used <code>city</code> as our recordWord, we used <code>cities</code> for recordWordPlural. Default: <code>recordWord + 's'</code></dd>
+            <dd>
+              The plural name of your rows. Since we used <code>city</code> as our recordWord, we used <code>cities</code> for recordWordPlural.<br>
+              <strong>Default:</strong> <code>recordWord + 's'</code>
+            </dd>
 
             <dt><code>sortDir</code></dt>
-            <dd>The initial sorting direction for the table. Default: <code>'asc'</code></dd>
+            <dd>
+              The initial sorting direction for the table.<br>
+              <strong>Default:</strong> <code>'asc'</code>
+            </dd>
 
             <dt><code>sortField</code></dt>
             <dd>The initial sorting column for the table. As of v0.5.0, this setting is optional and the order of <code>table.rows</code> will be maintained and sorting will be disabled.</dd>
 
             <dt><code>perPage</code></dt>
-            <dd>Integer indicating the number of rows to be shown per page. Default: <code>15</code></dd>
+            <dd>
+              Integer indicating the number of rows to be shown per page.<br>
+              <strong>Default:</strong> <code>15</code>
+            </dd>
 
             <dt><code>unsortedClass</code><br /><code>descSortClass</code><br /><code>ascSortClass</code></dt>
-            <dd>The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons. Default: <code>''</code> for each</dd>
+            <dd>
+              The classes given to the icons in the <code>th</code> elements indicating the direction of sorting. Set to '' if you would rather have no icons.<br>
+              <strong>Default:</strong> <code>''</code> for each
+            </dd>
+
+            <dt><code>rateLimitTimeout</code></td>
+            <dd>
+              The time (in milliseconds) to wait after changes to the observables (e.g. <code>filter</code>, <code>perPage</code>, etc.) have stopped before refreshing the data.<br>
+              <strong>Default:</strong> <code>undefined</code> when using client-side-pagination, and <code>500</code> when using server-side-pagination.
+            </dd>
+
+            <dt><code>serverSidePagination</code></td>
+            <dd>
+              An object with the following structure:<br>
+              <code>
+                {
+                <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;enabled: Boolean,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;path: String,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;loader: Function<br>
+                }
+              </code>
+              <br><br>
+              <code><strong>path</strong></code> is the URL of a json endpoint. The server should respond with the following structure:<br>
+              <code>
+                {
+                <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;total: Integer,<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;results: Array -- [Object]<br>
+                }
+              </code>
+              <br><br>
+              <code><strong>loader</strong></code> is the function used to map the results to rows (e.g. <code>function(result){return new Row(result)}</code>)
+              <br><br>
+              <strong>Default:</strong> <code>undefined</code> (client-side pagination is the default).
+            </dd>
           </dl>
           <p>Additionally, you can define the <code>match</code> function on the row class, and the datatable will use it for filtering. If left undefined (as in the example above), the DataTable will automatically search all columns defined on the row. E.g:</p>
           <dl>
@@ -479,7 +526,6 @@ document.addEventListener('DOMContentLoaded', function(){
             <dd>Results with 'united' in countryName and 'l' in cityName (case insensitive)<p class="text-muted">Note: as of right now, there is no built-in support for multi-word searching with ':'-delimeted searching</span></dd>
             <dt><code>countryname:japan 6</code></dt>
             <dd>Results with 'japan' in countryName and '6' somewhere in one of the columns (case insensitive)</dd>
-          </dl>
         </div>
       </div>
     </div>
