@@ -1,4 +1,4 @@
-class @DataTable
+class window.DataTable
 
   pureComputed = ko.pureComputed or ko.computed
 
@@ -81,7 +81,7 @@ class @DataTable
 
       rows = @rows.slice(0)
 
-      if filter isnt ''
+      if filter? and filter isnt ''
         filterFn = @filterFn(filter)
         rows = rows.filter(filterFn)
 

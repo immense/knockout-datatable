@@ -1,7 +1,7 @@
 (function() {
-  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  this.DataTable = (function() {
+  window.DataTable = (function() {
     var primitiveCompare, pureComputed;
 
     pureComputed = ko.pureComputed || ko.computed;
@@ -100,7 +100,7 @@
           _this.filtering(true);
           filter = _this.filter();
           rows = _this.rows.slice(0);
-          if (filter !== '') {
+          if ((filter != null) && filter !== '') {
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
@@ -205,9 +205,9 @@
           recordWord = _this.options.recordWord;
           recordWordPlural = _this.options.recordWordPlural || recordWord + 's';
           if (pages > 1) {
-            return "" + from + " to " + to + " of " + total + " " + recordWordPlural;
+            return from + " to " + to + " of " + total + " " + recordWordPlural;
           } else {
-            return "" + total + " " + (total > 1 || total === 0 ? recordWordPlural : recordWord);
+            return total + " " + (total > 1 || total === 0 ? recordWordPlural : recordWord);
           }
         };
       })(this));
@@ -255,21 +255,21 @@
       _defaultMatch = function(filter, row, attrMap) {
         var key, val;
         return ((function() {
-          var _results;
-          _results = [];
+          var results1;
+          results1 = [];
           for (key in attrMap) {
             val = attrMap[key];
-            _results.push(val);
+            results1.push(val);
           }
-          return _results;
+          return results1;
         })()).some(function(val) {
           return primitiveCompare((ko.isObservable(row[val]) ? row[val]() : row[val]), filter);
         });
       };
       return this.filterFn = this.options.filterFn || (function(_this) {
         return function(filterVar) {
-          var filter, specials, _ref;
-          _ref = [[], {}], filter = _ref[0], specials = _ref[1];
+          var filter, ref, specials;
+          ref = [[], {}], filter = ref[0], specials = ref[1];
           filterVar.split(' ').forEach(function(word) {
             var words;
             if (word.indexOf(':') >= 0) {
@@ -299,11 +299,11 @@
           return function(row) {
             var conditionals, key, val;
             conditionals = (function() {
-              var _results;
-              _results = [];
+              var results1;
+              results1 = [];
               for (key in specials) {
                 val = specials[key];
-                _results.push((function(_this) {
+                results1.push((function(_this) {
                   return function(key, val) {
                     var rowAttr;
                     if (rowAttr = _this.rowAttributeMap()[key.toLowerCase()]) {
@@ -314,9 +314,9 @@
                   };
                 })(this)(key, val));
               }
-              return _results;
+              return results1;
             }).call(_this);
-            return (__indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+            return (indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
           };
         };
       })(this);
@@ -327,14 +327,14 @@
       _getDataFromServer = (function(_this) {
         return function(data, cb) {
           var key, req, url, val;
-          url = "" + _this.options.paginationPath + "?" + (((function() {
-            var _results;
-            _results = [];
+          url = _this.options.paginationPath + "?" + (((function() {
+            var results1;
+            results1 = [];
             for (key in data) {
               val = data[key];
-              _results.push("" + (encodeURIComponent(key)) + "=" + (encodeURIComponent(val)));
+              results1.push((encodeURIComponent(key)) + "=" + (encodeURIComponent(val)));
             }
-            return _results;
+            return results1;
           })()).join('&'));
           req = new XMLHttpRequest();
           req.open('GET', url, true);
@@ -447,9 +447,9 @@
           recordWord = _this.options.recordWord;
           recordWordPlural = _this.options.recordWordPlural || recordWord + 's';
           if (pages > 1) {
-            return "" + from + " to " + to + " of " + total + " " + recordWordPlural;
+            return from + " to " + to + " of " + total + " " + recordWordPlural;
           } else {
-            return "" + total + " " + (total > 1 || total === 0 ? recordWordPlural : recordWord);
+            return total + " " + (total > 1 || total === 0 ? recordWordPlural : recordWord);
           }
         };
       })(this));
