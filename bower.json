@@ -1,6 +1,6 @@
 {
   "name": "knockout-datatable",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": false,
   "license": "MIT",
   "ignore": [
@@ -13,6 +13,6 @@
   ],
   "devDependencies": {},
   "dependencies": {
-    "knockout": "~3.2.0"
+    "knockout": "3.x"
   }
 }
