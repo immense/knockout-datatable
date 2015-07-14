@@ -32,6 +32,8 @@ The following methods are available on the DataTable instance:
 * `replaceRows(new_rows_array)`
   - resets the datatable's rows to `new_rows_array`
   - sets the current page to `1`
+* `forceFilter(true|false)` - enable / disable forcing filtering of the roles
+  - tells DataTable to filter the rows even if the current filter is falsey
 
 
 ## Building

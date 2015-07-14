@@ -67,6 +67,7 @@
     DataTable.prototype.initWithClientSidePagination = function(rows) {
       var _defaultMatch;
       this.filtering = ko.observable(false);
+      this.forceFilter = ko.observable(false);
       this.filter.subscribe((function(_this) {
         return function() {
           return _this.currentPage(1);
@@ -100,7 +101,7 @@
           _this.filtering(true);
           filter = _this.filter();
           rows = _this.rows.slice(0);
-          if ((filter != null) && filter !== '') {
+          if (_this.forceFilter() || ((filter != null) && filter !== '')) {
             filterFn = _this.filterFn(filter);
             rows = rows.filter(filterFn);
           }
@@ -267,8 +268,9 @@
         });
       };
       return this.filterFn = this.options.filterFn || (function(_this) {
-        return function(filterVar) {
-          var filter, ref, specials;
+        return function(filter_text) {
+          var filter, filterVar, ref, specials;
+          filterVar = filter_text == null ? "" : filter_text;
           ref = [[], {}], filter = ref[0], specials = ref[1];
           filterVar.split(' ').forEach(function(word) {
             var words;
@@ -316,7 +318,7 @@
               }
               return results1;
             }).call(_this);
-            return (indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+            return (indexOf.call(conditionals, false) < 0) && (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap()));
           };
         };
       })(this);

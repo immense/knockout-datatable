@@ -58,7 +58,8 @@ class window.DataTable
     @rows        = ko.observableArray []
 
   initWithClientSidePagination: (rows) ->
-    @filtering = ko.observable false
+    @filtering   = ko.observable false
+    @forceFilter = ko.observable false
 
     @filter.subscribe => @currentPage 1
     @perPage.subscribe => @currentPage 1
@@ -81,7 +82,7 @@ class window.DataTable
 
       rows = @rows.slice(0)
 
-      if filter? and filter isnt ''
+      if @forceFilter() or (filter? and filter isnt '')
         filterFn = @filterFn(filter)
         rows = rows.filter(filterFn)
 
@@ -168,8 +169,9 @@ class window.DataTable
       (val for key, val of attrMap).some (val) ->
         primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
 
-    @filterFn = @options.filterFn or (filterVar) =>
+    @filterFn = @options.filterFn or (filter_text) =>
       # Split up filterVar into :-based conditionals and a filter
+      filterVar = if not filter_text? then "" else filter_text
       [filter, specials] = [[],{}]
       filterVar.split(' ').forEach (word) ->
         if word.indexOf(':') >= 0
@@ -189,7 +191,7 @@ class window.DataTable
               primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
             else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
               false
-        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else _defaultMatch(filter, row, @rowAttributeMap())) else true)
+        (false not in conditionals) and (if row.match? then row.match(filter) else _defaultMatch(filter, row, @rowAttributeMap()))
 
   initWithServerSidePagination: ->
     _getDataFromServer = (data, cb) =>
