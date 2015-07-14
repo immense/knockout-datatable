@@ -169,8 +169,9 @@ class window.DataTable
       (val for key, val of attrMap).some (val) ->
         primitiveCompare((if ko.isObservable(row[val]) then row[val]() else row[val]), filter)
 
-    @filterFn = @options.filterFn or (filterVar) =>
+    @filterFn = @options.filterFn or (filter_text) =>
       # Split up filterVar into :-based conditionals and a filter
+      filterVar = if not filter_text? then "" else filter_text
       [filter, specials] = [[],{}]
       filterVar.split(' ').forEach (word) ->
         if word.indexOf(':') >= 0

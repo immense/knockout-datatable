@@ -268,8 +268,9 @@
         });
       };
       return this.filterFn = this.options.filterFn || (function(_this) {
-        return function(filterVar) {
-          var filter, ref, specials;
+        return function(filter_text) {
+          var filter, filterVar, ref, specials;
+          filterVar = filter_text == null ? "" : filter_text;
           ref = [[], {}], filter = ref[0], specials = ref[1];
           filterVar.split(' ').forEach(function(word) {
             var words;
