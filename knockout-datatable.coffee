@@ -191,7 +191,7 @@ class window.DataTable
               primitiveCompare((if ko.isObservable(row[rowAttr]) then row[rowAttr]() else row[rowAttr]), val)
             else # if the current instance doesn't have the "key" attribute, return false (i.e., it's not a match)
               false
-        (false not in conditionals) and (if filter isnt '' then (if row.match? then row.match(filter) else _defaultMatch(filter, row, @rowAttributeMap())) else true)
+        (false not in conditionals) and (if row.match? then row.match(filter) else _defaultMatch(filter, row, @rowAttributeMap()))
 
   initWithServerSidePagination: ->
     _getDataFromServer = (data, cb) =>

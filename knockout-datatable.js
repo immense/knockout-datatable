@@ -318,7 +318,7 @@
               }
               return results1;
             }).call(_this);
-            return (indexOf.call(conditionals, false) < 0) && (filter !== '' ? (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap())) : true);
+            return (indexOf.call(conditionals, false) < 0) && (row.match != null ? row.match(filter) : _defaultMatch(filter, row, _this.rowAttributeMap()));
           };
         };
       })(this);
