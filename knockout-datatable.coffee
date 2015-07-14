@@ -58,7 +58,8 @@ class window.DataTable
     @rows        = ko.observableArray []
 
   initWithClientSidePagination: (rows) ->
-    @filtering = ko.observable false
+    @filtering   = ko.observable false
+    @forceFilter = ko.observable false
 
     @filter.subscribe => @currentPage 1
     @perPage.subscribe => @currentPage 1
@@ -81,7 +82,7 @@ class window.DataTable
 
       rows = @rows.slice(0)
 
-      if filter? and filter isnt ''
+      if @forceFilter() or (filter? and filter isnt '')
         filterFn = @filterFn(filter)
         rows = rows.filter(filterFn)
 
