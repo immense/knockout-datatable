@@ -1,6 +1,6 @@
 {
   "name": "knockout-datatable",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": false,
   "scripts": {
     "compile": "grunt"
