@@ -2,6 +2,10 @@
   "name": "knockout-datatable",
   "version": "0.7.1",
   "private": false,
+  "main": [
+    "knockout-datatable.min.js",
+    "knockout-datatable.css"
+  ],
   "license": "MIT",
   "ignore": [
     ".gitignore",
