@@ -35,7 +35,6 @@ The following methods are available on the DataTable instance:
 * `forceFilter(true|false)` - enable / disable forcing filtering of the roles
   - tells DataTable to filter the rows even if the current filter is falsey
 
-
 ## Building
 
 To build the Knockout DataTable coffeescript source, do the following in a node.js enabled environment:
@@ -56,7 +55,7 @@ grunt
 
 ## Contributors
 
-See [Contributors](https://github.com/immense/knockout-datatable/wiki/Contributors)
+See [Contributors](CONTRIBUTORS.md)
 
 ## License
 
