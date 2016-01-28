@@ -513,7 +513,7 @@
           if (_this.sortField() === field) {
             return _this.sortDir(_this.sortDir() === 'asc' ? 'desc' : 'asc');
           } else {
-            _this.sortDir('asc');
+            _this.sortDir(_this.options.sortDir);
             return _this.sortField(field);
           }
         };
