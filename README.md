@@ -45,6 +45,16 @@ npm install
 grunt
 ```
 
+## Running tests
+
+To run the tests, do the following in a node.js enabled environment:
+
+```
+npm install -g grunt-cli
+npm install
+grunt test
+```
+
 ## Contributing
 
 1. Fork it
