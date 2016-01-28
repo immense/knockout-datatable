@@ -320,7 +320,7 @@ class window.DataTable
     if @sortField() is field
       @sortDir if @sortDir() is 'asc' then 'desc' else 'asc'
     else
-      @sortDir 'asc'
+      @sortDir @options.sortDir
       @sortField field
 
   prevPage: ->
