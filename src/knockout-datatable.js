@@ -1,6 +1,21 @@
-const pureComputed = ko.pureComputed || ko.computed;
+const _option_defaults = {
+  recordWord: 'record',
+  recordWordPlural: 'records',
+  sortDir: 'asc',
+  sortField: null,
+  perPage: 15,
+  filterFn: null,
+  unsortedClass: '',
+  descSortClass: '',
+  ascSortClass: '',
+  rateLimitTimeout: null
+};
 
-window.DataTable = class DataTable {
+const _com = ko.pureComputed || ko.computed;
+const _obs = (arg = null) => ko.observable(arg);
+const _unwrap = ko.utils.unwrapObservable;
+
+export class DataTable {
 
   constructor(rows, options) {
     if (!options) {
@@ -14,43 +29,25 @@ window.DataTable = class DataTable {
 
     const serverSideOpts = options.serverSidePagination;
 
-    this.rows = rows.slice(0);
+    this._rows = rows.slice(0);
 
-    this.options = {
-      recordWord:       options.recordWord          || 'record',
-      recordWordPlural: options.recordWordPlural    || (options.recordWord || 'record') + 's',
-      sortDir:          options.sortDir             || 'asc',
-      sortField:        options.sortField           || void 0,
-      perPage:          options.perPage             || 15,
-      filterFn:         options.filterFn            || void 0,
-      unsortedClass:    options.unsortedClass       || '',
-      descSortClass:    options.descSortClass       || '',
-      ascSortClass:     options.ascSortClass        || '',
-      rateLimitTimeout: options.rateLimitTimeout    || void 0
-    };
-
-    this.numPages         = ko.observable(void 0);
-    this.numFilteredRows  = ko.observable(void 0);
-    this.pagedRows        = ko.observable(void 0);
-    this.firstRecordIndex = ko.observable(void 0);
-    this.lastRecordIndex  = ko.observable(void 0);
-
-    this.sortDir          = ko.observable(this.options.sortDir);
-    this.sortField        = ko.observable(this.options.sortField);
-    this.perPage          = ko.observable(this.options.perPage);
-    this.currentPage      = ko.observable(1);
-    this.filter           = ko.observable('');
-    this.loading          = ko.observable(false);
-
-    if (serverSideOpts && serverSideOpts.enabled) {
-      this.options.serverSidePaginationEnabled = true;
-      if (!this.options.rateLimitTimeout && this.options.rateLimitTimeout !== 0) {
-        this.options.rateLimitTimeout = 500;
-      }
-      this.registerPaginationHandler(new ServerSidePaginationHandler(serverSideOpts));
-    } else {
-      this.registerPaginationHandler(new ClientSidePaginationHandler(this.rows));
+    this.options = Object.assign({}, _option_defaults, options);
+    if (options.recordWord != null && options.recordWordPlural == null) {
+      this.options.recordWordPlural = `${this.options.recordWord}s`;
     }
+
+    this.numPages = _obs();
+    this.numFilteredRows = _obs();
+    this.pagedRows = _obs();
+    this.firstRecordIndex = _obs();
+    this.lastRecordIndex = _obs();
+
+    this.sortDir = _obs(this.options.sortDir);
+    this.sortField = _obs(this.options.sortField);
+    this.perPage = _obs(this.options.perPage);
+    this.currentPage = _obs(1);
+    this.filter = _obs('');
+    this.loading = _obs(false);
   }
 
   registerPaginationHandler(handler) {
@@ -62,9 +59,9 @@ window.DataTable = class DataTable {
       'currentPage',
       'filter'
     ];
-    const refreshListener = ko.computed(() => {
+    const refreshListener = _com(() => {
       subscribeToProperties.forEach(property => {
-        handler[property] = this[property]();
+        handler[property] = _unwrap(this[property]);
       });
       this.refreshData();
     });
@@ -124,8 +121,8 @@ window.DataTable = class DataTable {
 
   get recordIndexes() {
     let firstRecordIndex = ((this.currentPage() - 1) * this.perPage()) + 1,
-        lastRecordIndex  = this.currentPage() * this.perPage(),
-        numFilteredRows  = this.numFilteredRows();
+        lastRecordIndex = this.currentPage() * this.perPage(),
+        numFilteredRows = this.numFilteredRows();
 
     if (lastRecordIndex > numFilteredRows) {
       lastRecordIndex = numFilteredRows;
@@ -138,64 +135,55 @@ window.DataTable = class DataTable {
   }
 
   refreshData() {
-    this.loading(true);
-    this.handler.getData(this.rows).then(({numPages, numFilteredRows, pagedRows}) => {
-      this.numPages(numPages);
-      this.numFilteredRows(numFilteredRows);
+    if (this.handler) {
+      this.loading(true);
+      this.handler
+        .getData(this._rows)
+        .then(({numPages, numFilteredRows, pagedRows}) => {
+          this.numPages(numPages);
+          this.numFilteredRows(numFilteredRows);
 
-      const recordIndexes = this.recordIndexes;
+          const recordIndexes = this.recordIndexes;
 
-      this.pagedRows(pagedRows);
-      this.firstRecordIndex(recordIndexes.firstRecordIndex);
-      this.lastRecordIndex(recordIndexes.lastRecordIndex);
+          this.pagedRows(pagedRows);
+          this.firstRecordIndex(recordIndexes.firstRecordIndex);
+          this.lastRecordIndex(recordIndexes.lastRecordIndex);
 
-      this.loading(false);
-    })
-    .catch(err => {
-      throw err;
-    });
-  }
-
-  addRecord(record) {
-    if (this.options.serverSidePaginationEnabled) {
-      throw new Error("#addRecord() not applicable with serverSidePagination enabled");
-    } else {
-      this.rows.push(record);
-      this.refreshData();
+          this.loading(false);
+        });
     }
   }
 
+  addRecord(record) {
+    this._rows.push(record);
+    this.refreshData();
+  }
+
   removeRecord(record) {
-    if (this.options.serverSidePaginationEnabled) {
-      throw new Error("#removeRecord() not applicable with serverSidePagination enabled");
-    } else {
-      const index = this.rows.indexOf(record);
-      if (index !== -1) {
-        this.rows.splice(index, 1);
-        if (this.onLastPage() && this.pagedRows().length === 1) {
-          this.moveToPrevPage();
-        } else {
-          this.refreshData();
-        }
+    const index = this._rows.indexOf(record);
+    if (index !== -1) {
+      this._rows.splice(index, 1);
+      if (this.onLastPage() && this.pagedRows().length === 1) {
+        this.moveToPrevPage();
       } else {
-        throw new Error("Could not remove record; record not found");
+        this.refreshData();
       }
+    } else {
+      throw new Error("Could not remove record; record not found");
     }
   }
 
   replaceRows(rows) {
-    if (this.options.serverSidePaginationEnabled) {
-      throw new Error("#replaceRows() not applicable with serverSidePagination enabled");
-    } else {
-      this.rows = rows.slice(0);
-      this.currentPage(1);
-      this.filter(void 0);
-    }
+    this._rows = rows.slice(0);
+    this.currentPage(1);
+    this.filter(null);
   }
+
+  rows(rows) {this.replaceRows(rows)}
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   pageClass(page) {
-    return pureComputed(() => {
+    return _com(() => {
       if (this.currentPage() === page) {
         return 'active';
       }
@@ -204,7 +192,7 @@ window.DataTable = class DataTable {
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   get leftPagerClass() {
-    return pureComputed(() => {
+    return _com(() => {
       if (this.currentPage() === 1) {
         return 'disabled';
       }
@@ -213,7 +201,7 @@ window.DataTable = class DataTable {
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   get rightPagerClass() {
-    return pureComputed(() => {
+    return _com(() => {
       if (this.currentPage() === this.numPages()) {
         return 'disabled';
       }
@@ -222,12 +210,12 @@ window.DataTable = class DataTable {
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   get recordsText() {
-    return pureComputed(() => {
-      const pages            = this.numPages(),
-            total            = this.numFilteredRows(),
-            from             = this.firstRecordIndex(),
-            to               = this.lastRecordIndex(),
-            recordWord       = this.options.recordWord,
+    return _com(() => {
+      const pages = this.numPages(),
+            total = this.numFilteredRows(),
+            from = this.firstRecordIndex(),
+            to = this.lastRecordIndex(),
+            recordWord = this.options.recordWord,
             recordWordPlural = this.options.recordWordPlural;
 
       if (pages > 1) {
@@ -240,7 +228,7 @@ window.DataTable = class DataTable {
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   get showNoData() {
-    return pureComputed(() => {
+    return _com(() => {
       const pagedRows = this.pagedRows();
       if (pagedRows) {
         return !pagedRows.length && !this.loading();
@@ -252,14 +240,14 @@ window.DataTable = class DataTable {
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   get showLoading() {
-    return pureComputed(() => {
+    return _com(() => {
       return this.loading();
     });
   }
 
   // TODO: Should this be here? It's more related to the view than the underlying datatable
   sortClass(column) {
-    return pureComputed(() => {
+    return _com(() => {
       if (this.sortField() === column) {
         if ('asc' === this.sortDir()) {
           return this.options.ascSortClass;
@@ -272,3 +260,6 @@ window.DataTable = class DataTable {
     });
   }
 };
+
+export {default as ClientSidePaginationHandler} from './client-side-pagination-handler';
+export {default as ServerSidePaginationHandler} from './server-side-pagination-handler';

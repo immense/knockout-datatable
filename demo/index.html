@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Knockout DataTable Test File</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js" charset="utf-8"></script>
+    <script src="../dist/knockout-datatable.js" charset="utf-8"></script>
+    <script src="../dist/client-side-pagination-handler.js" charset="utf-8"></script>
+    <script src="view_model.js" charset="utf-8"></script>
+    <script type="text/javascript">
+      function initApplication() {
+        window.view = new ExampleModel();
+        document.removeEventListener('DOMContentLoaded', initApplication);
+      }
+
+      document.addEventListener('DOMContentLoaded', initApplication);
+    </script>
+  </head>
+  <body>
+    <div class="cloak" data-bind="with: exampleTable">
+      <input type="text" data-bind="textInput: filter">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-bind="click: toggleSort('foo')">
+              Foo&nbsp;<i data-bind="css: sortClass('foo')"></i>
+            </th>
+            <th class="sortable" data-bind="click: toggleSort('bar')">
+              Bar&nbsp;<i data-bind="css: sortClass('bar')"></i>
+            </th>
+            <th>Baz</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-bind="visible: showNoData">
+            <td colspan="3">This table has no data.</td>
+          </tr>
+          <tr data-bind="visible: showLoading">
+            <td colspan="3">
+              <i class="icon-spinner" data-bind="css: {'icon-spin': showLoading}"></i>
+              &nbsp;Loading data...
+            </td>
+          </tr>
+          <tr data-bind="foreach: pagedRows">
+            <td data-bind="text: foo"></td>
+            <td data-bind="text: bar"></td>
+            <td data-bind="text: baz"></td>
+          </tr>
+        </tbody>
+      </table>
+      <span class="label label-info pull-right" data-bind="text: recordsText"></span>
+      <div class="pagination" data-bind="visible: numPages() > 1">
+        <ul>
+          <li data-bind="css: leftPagerClass, click: moveToPrevPage"><a href="#">&laquo;</a></li>
+          <!-- ko foreach: new Array(numPages()) -->
+          <li data-bind="css: $parent.pageClass($index + 1)">
+            <a href="#" data-bind="text: $index + 1, click: $parent.moveToPage($index + 1)"></a>
+          </li>
+          <!-- /ko -->
+          <li data-bind="css: rightPagerClass, click: moveToNextPage"><a href="#">&raquo;</a></li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,4 @@
-const unwrapObservable = ko.utils.unwrapObservable;
-
-const primitiveCompare = (item1, item2) => {
+function primitiveCompare(item1, item2) {
   if (item2 === null || item2 === undefined) {
     return item1 === null || item1 === undefined;
   } else if (item1 !== null && item1 !== undefined) {
@@ -12,172 +10,169 @@ const primitiveCompare = (item1, item2) => {
   } else {
     return false;
   }
-};
+}
 
-const obsComparer = (val1, val2) => {
-  const item1 = ko.isObservable(val1) ? val1() : val1;
-  return primitiveCompare(item1, val2);
-};
+function obsCompare(val1, val2) {
+  return primitiveCompare(unwrapObservable(val1), val2);
+}
 
-class ClientSidePaginationHandler {
-
-  rebuildRowAttributeMap(rows) {
-    let _getNewMap = () => {
-      let row = rows[0];
-      if (row) {
-        return new Map(
-          [for (key of Object.keys(row)) if (row.hasOwnProperty(key)) [key.toLowerCase(), key]]
-        );
+function buildRowAttributeMap(rows) {
+  const obj = {};
+  const row = rows[0];
+  if (row) {
+    for (key in row) {
+      if (row.hasOwnProperty(key)) {
+        obj[key.toLowerCase()] = key;
       }
-      return new Map();
-    };
-    this.rowAttributeMap = _getNewMap();
+    }
+  }
+  return obj;
+}
+
+function defaultMatch(attrMap, row) {
+  return filter => attrMap.some(([,key]) => obsCompare(row[key], filter));
+}
+
+const private_map = new WeakMap();
+
+export default class ClientSidePaginationHandler {
+
+  buildRowAttributeMap(rows) {
+    _private.set('rowAttributeMap', buildRowAttributeMap(rows));
   }
 
-  constructor(rows) {
-    this.sortDir     = void 0;
-    this.sortField   = void 0;
-    this.perPage     = void 0;
-    this.currentPage = void 0;
-    this.filter      = void 0;
-
-    this.rebuildRowAttributeMap(rows);
-
-    const _defaultMatch = (filter, row, attrMap) => {
-      return [for ([,val] of attrMap) val].some((val) => {
-        let tryVal = row[val];
-        if (ko.isObservable(tryVal)) {
-          return primitiveCompare(tryVal(), filter);
-        } else {
-          return primitiveCompare(tryVal, filter);
-        }
-      });
-    };
-
-    this.filterFn = filterVar => {
-      let specials = new Map(), filter = [];
-      filterVar.split(' ').forEach((word) => {
+  splitFilter() {
+    const filterVar = this.filter;
+    const specials = [];
+    const non_special_words = [];
+    if (filterVar) {
+      filterVar.split(' ').forEach(word => {
         if (word.indexOf(':') >= 0) {
-          let ret, words = word.split(':');
-           switch (words[1].toLowerCase()) {
+          const words = word.split(':');
+          switch (words[1].toLowerCase()) {
             case 'yes':
             case 'true':
-              specials.set(words[0], true);
-              break;
+            specials.push([words[0].toLowerCase(), true]);
+            break;
             case 'no':
             case 'false':
-              specials.set(words[0], false);
-              break;
+            specials.push([words[0].toLowerCase(), false]);
+            break;
             case 'blank':
             case 'none':
             case 'null':
             case 'undefined':
-              specials.set(words[0], void 0);
-              break;
+            specials.push([words[0].toLowerCase(), void 0]);
+            break;
             default:
-              specials.set(words[0], words[1].toLowerCase());
-              break;
+            specials.push([words[0].toLowerCase(), words[1].toLowerCase()]);
+            break;
           }
         } else {
-          filter.push(word);
+          non_special_words.push(word);
         }
       });
-      filter = filter.join(' ');
-      return (row) => {
-        if (filter === '') {
-          return true;
-        } else {
-          let attrMap = this.rowAttributeMap,
-              attrSpecialMap = new Map([
-                for ([key, val] of specials)
-                [attrMap[key.toLowerCase()], val]
-              ]),
-              conditionals = [
-                for ([rowAttr, val] of attrSpecialMap)
-                  rowAttr ? obsComparer(row[rowAttr], val) : false
-              ];
-
-          if (conditionals.indexOf(false) === -1) {
-            if ('function' === typeof row.match) {
-              return row.match(filter);
-            } else {
-              return _defaultMatch(filter, row, attrMap);
-            }
-          } else {
-            return false;
-          }
-        }
-      };
-    };
-  }
-
-  filterRows(rows) {
-    let filteredRows;
-    if (this.filter !== '') {
-      filteredRows = rows.filter(this.filterFn(this.filter));
+      _private.set('filter__specials', specials);
+      _private.set('filter__non_special_words', non_special_words.join(' '));
     } else {
-      filteredRows = rows;
+      _private.set('filter__specials', []);
+      _private.set('filter__non_special_words', null);
     }
-
-    return Promise.resolve(filteredRows);
   }
 
-  sortRows(rows) {
-    let sortedRows = rows.slice(0);
-    if (!this.sortField && this.sortField !== 0) {
-      return Promise.resolve(sortedRows);
-    }
-    const comparer = (a, b) => {
-      const [aVal, bVal] = [a, b].map(v => {
-        let unwrapped = unwrapObservable(v[this.sortField]);
-        if ('string' === typeof unwrapped) {
-          unwrapped = unwrapped.toLowerCase();
-        }
-        return unwrapped;
-      });
+  constructor() {
+    const _private = new Map();
+    private_map.set(this, _private);
 
-      if ('asc' === this.sortDir) {
-        if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
-          return -1;
+    this.sortDir = null;
+    this.sortField = null;
+    this.perPage = null;
+    this.currentPage = null;
+    this.filter = null;
+    _private.set('rowAttributeMap', {});
+    _private.set('filter__specials', []);
+    _private.set('filter__non_special_words', null);
+
+    _private.set('filterRows', rows => {
+      // TODO Need a way to make sure these observables are up-to-date before
+      // unwrapping them.
+      const rowAttrs = _private.get('rowAttributeMap');
+      const specials = _private.get('filter__specials').map(([k, v]) => [rowAttrs[k], v])
+      const filter_words = _private.get('filter__non_special_words');
+
+      if (!specials.length && filter_words === '') return Promise.resolve(rows);
+
+      function filterFn(row) {
+        if (specials.all(([key, val]) => obsCompare(row[key], val))) {
+          if (filter_words === '') return true;
+          const match = ('function' === typeof row.match) ? row.match : defaultMatch(rowAttrs, row);
+          return match(filter_words);
         } else {
-          if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
-            return 1;
-          } else {
-            return 0;
-          }
-        }
-      } else {
-        if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
-          return 1;
-        } else {
-          if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
-            return -1;
-          } else {
-            return 0;
-          }
+          return false;
         }
       }
-    };
-    sortedRows.sort(comparer);
-    return Promise.resolve(sortedRows);
-  }
 
-  pageRows(rows) {
-    const pageIndex = this.currentPage - 1,
-          perPage   = this.perPage,
-          pagedRows = rows.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
+      return Promise.resolve(rows.filter(filterFn));
+    });
 
-    return Promise.resolve({pagedRows, totalNumRows: rows.length});
+    _private.set('sortRows', rows => {
+      if (!this.sortField && this.sortField !== 0) {
+        return Promise.resolve(rows.slice(0));
+      }
+      return Promise.resolve(rows.slice(0).sort((a, b) => {
+        const [aVal, bVal] = [a, b].map(v => {
+          let unwrapped = unwrapObservable(v[this.sortField]);
+          if ('string' === typeof unwrapped) {
+            unwrapped = unwrapped.toLowerCase();
+          }
+          return unwrapped;
+        });
+
+        if ('asc' === this.sortDir) {
+          if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
+            return -1;
+          } else {
+            if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+        } else {
+          if (aVal < bVal || aVal === '' || aVal === null || aVal === undefined) {
+            return 1;
+          } else {
+            if (aVal > bVal || bVal === '' || bVal === null || bVal === undefined) {
+              return -1;
+            } else {
+              return 0;
+            }
+          }
+        }
+      }));
+    });
+
+    _private.set('pageRows', rows => {
+      const pageIndex = this.currentPage - 1;
+      const perPage   = this.perPage;
+      const pagedRows = rows.slice(pageIndex * perPage, (pageIndex + 1) * perPage);
+
+      return Promise.resolve({pagedRows, totalNumRows: rows.length});
+    });
   }
 
   getData(rows) {
-    return this.filterRows(rows)
-      .then(filteredRows => this.sortRows(filteredRows))
-      .then(sortedRows => this.pageRows(sortedRows))
+    this.splitFilter();
+    this.buildRowAttributeMap(rows);
+
+    const _private = private_map.get(this);
+    return _private.get('filterRows')(rows)
+      .then(filteredRows => _private.get('sortRows')(filteredRows))
+      .then(sortedRows => _private.get('pageRows')(sortedRows))
       .then(({pagedRows, totalNumRows}) => Promise.resolve({
         numPages:        Math.ceil(totalNumRows / this.perPage),
         numFilteredRows: totalNumRows,
         pagedRows:       pagedRows
       }));
   }
-}
+};
