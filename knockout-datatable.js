@@ -108,8 +108,8 @@
           if ((_this.sortField() != null) && _this.sortField() !== '') {
             rows.sort(function(a, b) {
               var aVal, bVal;
-              aVal = ko.utils.unwrapObservable(a[_this.sortField()]);
-              bVal = ko.utils.unwrapObservable(b[_this.sortField()]);
+              aVal = ko.utils.peekObservable(a[_this.sortField()]);
+              bVal = ko.utils.peekObservable(b[_this.sortField()]);
               if (typeof aVal === 'string') {
                 aVal = aVal.toLowerCase();
               }
