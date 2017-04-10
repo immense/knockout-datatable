@@ -88,8 +88,8 @@ class window.DataTable
 
       if @sortField()? and @sortField() isnt ''
         rows.sort (a,b) =>
-          aVal = ko.utils.unwrapObservable a[@sortField()]
-          bVal = ko.utils.unwrapObservable b[@sortField()]
+          aVal = ko.utils.peekObservable a[@sortField()]
+          bVal = ko.utils.peekObservable b[@sortField()]
           if typeof aVal is 'string' then aVal = aVal.toLowerCase()
           if typeof bVal is 'string' then bVal = bVal.toLowerCase()
           if @sortDir() is 'asc'
